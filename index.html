@@ -62,7 +62,7 @@
 /***************************************************************************************************
  * ServiceNow Bookmarklet Suite
  * Description: A unified generator for creating a variety of powerful ServiceNow bookmarklets.
- * Version: 2.3 (Patched based on third Analysis Report)
+ * Version: 2.4 (Patched Field Modifier UI generation bug)
  ***************************************************************************************************/
 
 function showToast(message, type = 'success') {
@@ -158,7 +158,6 @@ const TOOL_REGISTRY = {
                             
                             const originalName = input.getAttribute('data-sn-name') || input.name || input.id;
 
-                            // [FIX] More robust field name cleaning to support any table.
                             const cleanFieldName = (name) => {
                                 let cleaned = name.replace(/^sys_display\\./, '');
                                 cleaned = cleaned.replace(/^[a-z_]+\\./, '');
@@ -172,7 +171,6 @@ const TOOL_REGISTRY = {
                             if (input.tagName === 'SELECT') { domValue = input.value; domDisplayValue = input.selectedOptions[0] && input.selectedOptions[0].textContent.trim(); } 
                             else if (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') { 
                                 domValue = input.value; 
-                                // [FIX] More precise display value detection using originalName.
                                 const displayInput = el.querySelector(\`input[id="\${originalName}_display"], input[name="\${originalName}_display"]\`) || el.querySelector('input[id*="sys_display"][name*="sys_display"]:not([type="hidden"])');
                                 domDisplayValue = (displayInput?.value && displayInput.value !== domValue) ? displayInput.value.trim() : null;
                             }
@@ -405,9 +403,26 @@ const TOOL_REGISTRY = {
                         const listEl = this.win.document.getElementById(this.panelId + '-rules'); if (!listEl) return; if (!this.rules.length) { listEl.innerHTML = '<div style="padding:20px;text-align:center;opacity:0.7;">No rules defined. Click "Add Rule" to start.</div>'; return; }
                         const fieldOptions = this.fields.map(f => \`<option value="\${f.name}">\${f.label} (\${f.name})</option>\`).join(''); const conditionOptions = \`<option value="equals">equals</option><option value="contains">contains</option><option value="not_contains">does not contain</option><option value="starts_with">starts with</option><option value="not_empty">is not empty</option>\`;
                         listEl.innerHTML = this.rules.map((rule, i) => {
-                            const selectedField = this.fields.find(f => f.name === rule.field); let conditionHTML = '';
-                            if (selectedField) { if (selectedField.isBool) { conditionHTML = \` is <select class="builder-select" onchange="window.fieldModifier.updateRule(\${i}, 'conditionValue', this.value)"><option value="true" \${rule.conditionValue==='true'?'selected':''}>True/Yes</option><option value="false" \${rule.conditionValue==='false'?'selected':''}>False/No</option></select>\`; } else if (selectedField.isDate) { conditionHTML = \` has any value\`; } else { conditionHTML = \`<select class="builder-select" onchange="window.fieldModifier.updateRule(\${i}, 'operator', this.value)">\${conditionOptions.replace(\`value="\${rule.operator}"\`, \`value="\${rule.operator}" selected\`)}</select> <input type="text" \${rule.operator === 'not_empty' ? 'style="display:none"' : ''} value="\${rule.conditionValue}" onchange="window.fieldModifier.updateRule(\${i}, 'conditionValue', this.value)" style="width:80px;padding:2px;">\`; } }
-                            let actionHTML = ''; if (this.config.actionType === 'replace') { actionHTML = \`Find: <input type="text" value="\${rule.findText || ''}" onchange="window.fieldModifier.updateRule(\${i}, 'findText', this.value)" style="width:80px;padding:2px;"> With: <input type="text" value="\${rule.replaceText || ''}" onchange="window.fieldModifier.updateRule(\${i}, 'replaceText', this.value)" style="width:80px;padding:2px;">\`; } else { const textLabel = this.config.actionType === 'overwrite' ? 'New Text' : (selectedField && selectedField.isDate ? 'Date Format' : 'Text to Add'); const textPlaceholder = selectedField && selectedField.isDate ? 'e.g., - MM-DD' : 'e.g., - PROCESSED'; actionHTML = \`\${textLabel}: <input type="text" value="\${rule.valueText || ''}" onchange="window.fieldModifier.updateRule(\${i}, 'valueText', this.value)" placeholder="\${textPlaceholder}" style="width:120px;padding:2px;">\`; }
+                            const selectedField = this.fields.find(f => f.name === rule.field); 
+                            let conditionHTML = '';
+                            if (selectedField) {
+                                if (selectedField.isBool) {
+                                    conditionHTML = \` is <select class="builder-select" onchange="window.fieldModifier.updateRule(\${i}, 'conditionValue', this.value)"><option value="true" \${rule.conditionValue === 'true' ? 'selected' : ''}>True/Yes</option><option value="false" \${rule.conditionValue === 'false' ? 'selected' : ''}>False/No</option></select>\`;
+                                } else if (selectedField.isDate) {
+                                    conditionHTML = \` has any value\`;
+                                } else {
+                                    const conditionInputStyle = \`width:80px;padding:2px;\${rule.operator === 'not_empty' ? 'display:none;' : ''}\`;
+                                    conditionHTML = \`<select class="builder-select" onchange="window.fieldModifier.updateRule(\${i}, 'operator', this.value)">\${conditionOptions.replace(\`value="\${rule.operator}"\`, \`value="\${rule.operator}" selected\`)}</select> <input type="text" value="\${rule.conditionValue}" onchange="window.fieldModifier.updateRule(\${i}, 'conditionValue', this.value)" style="\${conditionInputStyle}">\`;
+                                }
+                            }
+                            let actionHTML = '';
+                            if (this.config.actionType === 'replace') {
+                                actionHTML = \`Find: <input type="text" value="\${rule.findText || ''}" onchange="window.fieldModifier.updateRule(\${i}, 'findText', this.value)" style="width:80px;padding:2px;"> With: <input type="text" value="\${rule.replaceText || ''}" onchange="window.fieldModifier.updateRule(\${i}, 'replaceText', this.value)" style="width:80px;padding:2px;">\`;
+                            } else {
+                                const textLabel = this.config.actionType === 'overwrite' ? 'New Text' : (selectedField && selectedField.isDate ? 'Date Format' : 'Text to Add');
+                                const textPlaceholder = selectedField && selectedField.isDate ? 'e.g., - MM-DD' : 'e.g., - PROCESSED';
+                                actionHTML = \`\${textLabel}: <input type="text" value="\${rule.valueText || ''}" onchange="window.fieldModifier.updateRule(\${i}, 'valueText', this.value)" placeholder="\${textPlaceholder}" style="width:120px;padding:2px;">\`;
+                            }
                             return \`<div style="padding:10px;border-bottom:1px solid #eee;display:grid;grid-template-columns:auto 1fr 1fr auto;gap:10px;align-items:center;font-size:0.9em;"><span>IF</span><div><select class="builder-select" onchange="window.fieldModifier.updateRule(\${i}, 'field', this.value)"><option value="">Select Field</option>\${fieldOptions.replace(\`value="\${rule.field}"\`, \`value="\${rule.field}" selected\`)}</select>\${conditionHTML}</div><div>THEN \${actionHTML}</div><button onclick="window.fieldModifier.removeRule(\${i})">&times;</button></div>\`;
                         }).join('');
                     },
