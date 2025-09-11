@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Tools - ServiceNow Bookmarklet Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; }
+        .toast { display: flex; align-items: center; padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); color: white; opacity: 0; transform: translateX(100%); animation: slideIn 0.5s forwards, fadeOut 0.5s 4.5s forwards; }
+        .toast.success { background-color: #22c55e; }
+        .toast.error { background-color: #ef4444; }
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateX(100%); } }
+        .input { @apply mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500; }
+        .form-checkbox { @apply h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500; }
+        .builder-select { @apply text-sm p-1 border border-slate-300 rounded-md shadow-sm; }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+
+    <div id="toast-container"></div>
+
+    <div class="container w-full max-w-3xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-slate-800">ServiceNow List Tools</h1>
+            <p class="text-slate-600 mt-2">Build bookmarklets that run on ServiceNow list views.</p>
+            <a href="index.html" class="text-blue-600 hover:underline mt-2 inline-block">&larr; Back to Home</a>
+        </header>
+
+        <main id="app-container" class="bg-white p-8 rounded-2xl shadow-lg">
+            <!-- Step 1: Choose Tool -->
+            <div id="step1" class="step active">
+                <h2 class="text-2xl font-semibold text-slate-800 mb-6">Step 1: Choose a Tool to Build</h2>
+                <div id="tool-selection-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4"></div>
+            </div>
+
+            <!-- Step 2: Configure -->
+            <div id="step2" class="step">
+                <h2 id="config-title" class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4"></h2>
+                <div id="config-container" class="space-y-6"></div>
+                <div class="mt-6">
+                    <label for="bookmarkletName" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
+                    <input type="text" id="bookmarkletName" class="input">
+                </div>
+                <div class="mt-8 flex justify-between items-center">
+                    <button id="backBtn" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
+                    <button id="generateBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Get Bookmarklet -->
+            <div id="step3" class="step"></div>
+        </main>
+    </div>
+
+<script>
+/***************************************************************************************************
+ * ServiceNow Bookmarklet Suite - List Tools
+ ***************************************************************************************************/
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+}
+
+const SN_LOGIC = {
+    findEnv: function(win) {
+        try {
+            function findFrameInShadow(rootNode) { let found = rootNode.querySelector('#gsft_main, iframe[name="gsft_main"]'); if (found) return found; const allElements = rootNode.querySelectorAll('*'); for (const el of allElements) { if (el.shadowRoot) { found = findFrameInShadow(el.shadowRoot); if (found) return found; } } return null; }
+            function getEnv(targetWin) { if (!targetWin) return null; if (targetWin.g_form && typeof targetWin.g_form.getTableName === 'function') { return { type: 'form', context: { win: targetWin, g_form: targetWin.g_form } }; } const listEl = targetWin.document.querySelector('#task_table, .list_table, [data-list_id]'); if (listEl) { return { type: 'list', context: { win: targetWin, listEl: listEl } }; } return null; }
+            const frameEl = findFrameInShadow(win.document);
+            if (frameEl && frameEl.contentWindow) {
+                try {
+                    const frameEnv = getEnv(frameEl.contentWindow);
+                    if (frameEnv) return frameEnv;
+                } catch(e) { 
+                    console.debug('Cross-origin frame access blocked (expected):', e.message); 
+                }
+            }
+            return getEnv(win);
+        } catch (e) { console.error('Error finding ServiceNow environment:', e); }
+        return null;
+    }
+};
+
+const TOOL_REGISTRY = {
+    report_builder: {
+        title: "Report Builder",
+        description: "For extracting information from ticket lists. Define filters and pull specific data into a report.",
+        instructions: "Run the generated bookmarklet on a ServiceNow list view. A report will be generated in a modal based on the criteria you defined.",
+        buildConfigUI: () => `
+            <div class="space-y-6">
+                <div class="p-4 bg-slate-50 rounded-lg border">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3">1. Filtering Criteria</h3>
+                    <p class="text-sm text-slate-600 mb-2">Define the rules for which tickets to include in the report.</p>
+                    <div><label for="filterField" class="block text-sm font-medium text-slate-700">Filter Field Name (from column header)</label><input type="text" id="filterField" class="input" value="short_description"></div>
+                    <div class="mt-4"><label for="filterKeywords" class="block text-sm font-medium text-slate-700">Keywords (comma-separated, all must be present)</label><input type="text" id="filterKeywords" class="input" value="onboard, vpn"></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-lg border">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3">2. Data to Extract</h3>
+                    <p class="text-sm text-slate-600 mb-2">Specify the field from which to pull data for the report.</p>
+                    <div><label for="extractField" class="block text-sm font-medium text-slate-700">Extraction Field Name (from column header)</label><input type="text" id="extractField" class="input" placeholder="e.g., u_employee_id or caller_id.name"><p class="text-xs text-slate-500 mt-1">Tip: Find the field name by looking at the column's 'glide_field' attribute or label.</p></div>
+                </div>
+            </div>`,
+        generateScript: (cfg) => {
+            const findEnvFn = `function(w){try{function e(t){let n=t.querySelector("#gsft_main,iframe[name=gsft_main]");if(n)return n;const o=t.querySelectorAll("*");for(const r of o)if(r.shadowRoot&&(n=e(r.shadowRoot)))return n;return null}function t(n){return n?n.g_form&&"function"==typeof n.g_form.getTableName?{type:"form",context:{win:n,g_form:n.g_form}}:n.document.querySelector("#task_table,.list_table,[data-list_id]")?{type:"list",context:{win:n,listEl:n.document.querySelector("#task_table,.list_table,[data-list_id]")}}:null:null}const n=e(w.document);if(n&&n.contentWindow){try{const o=t(n.contentWindow);if(o)return o}catch(o){console.debug("Cross-origin frame access blocked (expected):",o.message)}}return t(w)}catch(o){return console.error("Error finding ServiceNow environment:",o),null}}`;
+            return `(function(){
+                const cfg = ${JSON.stringify(cfg)};
+                const findEnv = ${findEnvFn};
+                const sanitize = (str) => str.replace(/[<>"'&]/g, (m) => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[m]));
+                const env = findEnv(window.top);
+                if (!env || env.type !== 'list') { alert('This report tool must be run on a ServiceNow list view. Please navigate to a list (like incident_list.do) and try again.'); return; }
+                const { win: winCtx, listEl } = env.context;
+                
+                const headers = Array.from(listEl.querySelectorAll('thead th'));
+                const findIndex = (fieldName) => {
+                    let idx = headers.findIndex(th => th.getAttribute('glide_field') === fieldName);
+                    if (idx !== -1) return idx;
+                    idx = headers.findIndex(th => th.textContent.trim().toLowerCase() === fieldName.toLowerCase());
+                    if (idx !== -1) return idx;
+                    return headers.findIndex(th => {
+                        const text = th.textContent.trim().toLowerCase();
+                        return text.includes(fieldName.toLowerCase()) || fieldName.toLowerCase().includes(text);
+                    });
+                };
+                const filterIndex = findIndex(cfg.filterField);
+                const extractIndex = findIndex(cfg.extractField);
+                
+                if (filterIndex === -1) { alert('Filter field "' + sanitize(cfg.filterField) + '" not found. Available columns: ' + headers.map(h => sanitize(h.getAttribute('glide_field') || h.textContent.trim())).join(', ')); return; }
+                if (extractIndex === -1) { alert('Extract field "' + sanitize(cfg.extractField) + '" not found. Available columns: ' + headers.map(h => sanitize(h.getAttribute('glide_field') || h.textContent.trim())).join(', ')); return; }
+                
+                const rows = Array.from(listEl.querySelectorAll('tbody > tr'));
+                const results = [];
+                const keywords = cfg.filterKeywords || [];
+
+                rows.forEach(row => {
+                    const filterCell = row.cells[filterIndex];
+                    if (!filterCell) return;
+                    
+                    const cellText = filterCell.textContent.toLowerCase();
+                    const allKeywordsMatch = keywords.length > 0 ? keywords.every(keyword => cellText.includes(keyword)) : true;
+
+                    if (allKeywordsMatch) {
+                        const extractCell = row.cells[extractIndex];
+                        if (extractCell) { results.push(extractCell.textContent.trim()); }
+                    }
+                });
+                
+                const unique = [...new Set(results)];
+                const text = unique.length ? unique.join('\\n') : \`No records found matching filter: "\${cfg.filterKeywords.join(', ')}" in \${cfg.filterField}\`;
+                
+                const modalId = 'sn-report-modal-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                const modalEl = document.createElement('div');
+                modalEl.id = modalId;
+                modalEl.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#0008;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;';
+                const reportHTML = '<div style="width:100%;max-width:600px;background:#fff;color:#000;border-radius:12px;box-shadow:0 8px 32px #0005;display:flex;flex-direction:column;"><h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">Report: ' + unique.length + ' Found<button onclick="document.getElementById(\\'' + modalId + '\\').remove()" style="background:transparent;border:none;color:white;font-size:24px;cursor:pointer;">&times;</button></h3><div style="padding:20px;"><textarea readonly style="width:100%;height:30vh;padding:10px;border:1px solid #ccc;border-radius:6px;font-family:monospace;">' + text + '</textarea></div><div style="padding:0 20px 20px;border-top:1px solid #ccc;display:flex;justify-content:flex-end;gap:10px;padding-top:20px;"><button id="' + modalId + '-copy">Copy to Clipboard</button></div></div>';
+                modalEl.innerHTML = reportHTML;
+                document.body.appendChild(modalEl);
+                document.getElementById(modalId + '-copy').onclick = () => { try { const textArea = document.createElement("textarea"); textArea.value = text.replace(/\\\\n/g, '\\n'); document.body.appendChild(textArea); textArea.select(); document.execCommand('copy'); document.body.removeChild(textArea); const btn = document.getElementById(modalId + '-copy'); btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy to Clipboard'; }, 2000); } catch(e) { alert('Failed to copy.'); } };
+            })();`;
+        }
+    },
+    deferred_updater: {
+        title: "Deferred Bulk Updater",
+        description: "Select tickets from a list, write one comment, and schedule it to be applied to all selected tickets after a delay.",
+        instructions: "Run the generated bookmarklet on a ServiceNow list view. A panel will appear allowing you to select tickets and schedule a bulk comment update.",
+        buildConfigUI: () => `
+            <div class="space-y-4">
+                 <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
+                    This tool creates a bookmarklet for scheduling bulk updates from a list view.
+                </div>
+                <div>
+                    <label for="commentField" class="block text-sm font-medium text-slate-700">Target Comment Field</label>
+                    <select id="commentField" class="input">
+                        <option value="work_notes" selected>Work Notes (Internal)</option>
+                        <option value="comments">Additional Comments (Customer Visible)</option>
+                    </select>
+                </div>
+            </div>`,
+        generateScript: (cfg) => {
+            const findEnvFn = `function(w){try{function e(t){let n=t.querySelector("#gsft_main,iframe[name=gsft_main]");if(n)return n;const o=t.querySelectorAll("*");for(const r of o)if(r.shadowRoot&&(n=e(r.shadowRoot)))return n;return null}function t(n){return n?n.g_form&&"function"==typeof n.g_form.getTableName?{type:"form",context:{win:n,g_form:n.g_form}}:n.document.querySelector("#task_table,.list_table,[data-list_id]")?{type:"list",context:{win:n,listEl:n.document.querySelector("#task_table,.list_table,[data-list_id]")}}:null:null}const n=e(w.document);if(n&&n.contentWindow){try{const o=t(n.contentWindow);if(o)return o}catch(o){console.debug("Cross-origin frame access blocked (expected):",o.message)}}return t(w)}catch(o){return console.error("Error finding ServiceNow environment:",o),null}}`;
+            
+            return `(function(){
+                const cfg = ${JSON.stringify(cfg)};
+                const findEnv = ${findEnvFn};
+                const env = findEnv(window.top);
+
+                if (!env || env.type !== 'list') {
+                    alert('This tool must be run on a ServiceNow list view. Please navigate to a list (like incident_list.do) and try again.');
+                    return;
+                }
+
+                const { win: winCtx, listEl } = env.context;
+                const tableName = listEl.getAttribute('glide_table') || 'task';
+                const modalId = 'sdbu-' + Date.now() + '-' + performance.now().toString(36).replace('.', '') + '-' + Math.random().toString(36).substr(2, 9);
+                
+                if (document.getElementById(modalId)) return;
+
+                const tickets = Array.from(listEl.querySelectorAll('tbody > tr')).map(row => {
+                    const sysId = row.getAttribute('sys_id');
+                    const numberEl = row.querySelector('td[glide_field="number"] a');
+                    const shortDescEl = row.querySelector('td[glide_field="short_description"]');
+                    if (!sysId || !numberEl) return null;
+                    return {
+                        sysId: sysId,
+                        number: numberEl.textContent.trim(),
+                        shortDesc: shortDescEl ? shortDescEl.textContent.trim() : ''
+                    };
+                }).filter(Boolean);
+
+                if (tickets.length === 0) {
+                    alert('No tickets found in the current list view.');
+                    return;
+                }
+                
+                const modalHTML = \`
+                    <div id="\${modalId}" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;">
+                        <div style="width:90%;max-width:800px;background:#fff;color:#000;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);display:flex;flex-direction:column;max-height:90vh;">
+                            <h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0;">Deferred Bulk Updater</h3>
+                            <div style="padding:20px;overflow-y:auto;flex-grow:1;">
+                                <div id="\${modalId}-ticket-list" style="max-height:30vh;overflow-y:auto;border:1px solid #ccc;padding:10px;border-radius:6px;">
+                                    \${tickets.map(t => \`
+                                        <label style="display:flex;align-items:center;padding:8px;border-bottom:1px solid #eee;cursor:pointer;">
+                                            <input type="checkbox" value="\${t.sysId}" class="\${modalId}-ticket-cb" style="margin-right:12px;">
+                                            <div>
+                                                <strong>\${t.number}</strong><br>
+                                                <span style="font-size:0.9em;opacity:0.8;">\${t.shortDesc}</span>
+                                            </div>
+                                        </label>
+                                    \`).join('')}
+                                </div>
+                                <div style="margin-top:20px;">
+                                    <label for="\${modalId}-comment" style="display:block;font-weight:bold;margin-bottom:5px;">Comment to Add:</label>
+                                    <textarea id="\${modalId}-comment" style="width:100%;height:100px;padding:8px;border:1px solid #ccc;border-radius:6px;"></textarea>
+                                </div>
+                                <div style="margin-top:20px;">
+                                    <label for="\${modalId}-delay" style="display:block;font-weight:bold;margin-bottom:5px;">Delay (in minutes):</label>
+                                    <input type="number" id="\${modalId}-delay" value="5" min="1" style="width:100px;padding:8px;border:1px solid #ccc;border-radius:6px;">
+                                </div>
+                            </div>
+                            <div id="\${modalId}-footer" style="padding:20px;border-top:1px solid #ccc;display:flex;justify-content:flex-end;gap:10px;">
+                                <button id="\${modalId}-cancel" style="padding:8px 16px;">Cancel</button>
+                                <button id="\${modalId}-schedule" style="padding:8px 16px;background:#0066cc;color:#fff;border:none;border-radius:4px;">Schedule Update</button>
+                            </div>
+                        </div>
+                    </div>
+                \`;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                const closeModal = () => document.getElementById(modalId)?.remove();
+
+                document.getElementById(modalId + '-cancel').onclick = closeModal;
+                document.getElementById(modalId + '-schedule').onclick = () => {
+                    const selectedIds = Array.from(document.querySelectorAll('.\${modalId}-ticket-cb:checked')).map(cb => cb.value);
+                    const comment = document.getElementById(modalId + '-comment').value.trim();
+                    const delayMinutes = parseInt(document.getElementById(modalId + '-delay').value, 10);
+
+                    if (selectedIds.length === 0) { alert('Please select at least one ticket.'); return; }
+                    if (!comment) { alert('Please enter a comment.'); return; }
+                    if (isNaN(delayMinutes) || delayMinutes < 1) { alert('Please enter a valid delay in minutes (1 or more).'); return; }
+
+                    const delayMs = delayMinutes * 60 * 1000;
+                    
+                    alert(\`Update for \${selectedIds.length} tickets has been scheduled to run in \${delayMinutes} minutes. You can close this tab, but not the browser window.\`);
+                    closeModal();
+
+                    setTimeout(() => {
+                        (async () => {
+                            console.log(\`Starting deferred update for \${selectedIds.length} tickets...\`);
+                            const GFORM_POLL_INTERVAL = 100, GFORM_MAX_ATTEMPTS = 50, SAVE_DELAY_MS = 1500;
+                            const waitForGForm = (win) => new Promise((resolve, reject) => { let attempts = 0; const check = () => { if (win && win.g_form && typeof win.g_form.getValue === 'function') { resolve(win.g_form); } else if (attempts++ < GFORM_MAX_ATTEMPTS) { setTimeout(check, GFORM_POLL_INTERVAL); } else { reject(new Error('g_form not available')); } }; check(); });
+                            
+                            for (const sysId of selectedIds) {
+                                try {
+                                    const url = '/' + tableName + '.do?sys_id=' + sysId + '&sysparm_nostack=true';
+                                    const frame = document.createElement('iframe');
+                                    frame.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;';
+                                    document.body.appendChild(frame);
+                                    
+                                    await new Promise((resolve, reject) => {
+                                        frame.onload = async () => {
+                                            try {
+                                                const g_form = await waitForGForm(frame.contentWindow);
+                                                g_form.setValue(cfg.commentField, comment);
+                                                g_form.save();
+                                                console.log(\`Successfully updated ticket with sys_id: \${sysId}\`);
+                                                setTimeout(() => { frame.remove(); resolve(); }, SAVE_DELAY_MS);
+                                            } catch(e) { frame.remove(); reject(e); }
+                                        };
+                                        frame.onerror = () => { frame.remove(); reject(new Error('Frame load error')); };
+                                        frame.src = url;
+                                    });
+                                } catch (e) {
+                                    console.error(\`Failed to update ticket with sys_id: \${sysId}\`, e);
+                                }
+                            }
+                            alert('Deferred bulk update process has completed.');
+                        })();
+                    }, delayMs);
+                };
+            })();`
+        }
+    }
+};
+
+const wizard = {
+    state: { activeToolKey: null, finalCode: null },
+    elements: {},
+    init() {
+        this.cacheDOMElements();
+        this.buildToolSelection();
+        this.addEventListeners();
+    },
+    cacheDOMElements() {
+        this.elements = {
+            steps: document.querySelectorAll('.step'),
+            toolSelectionGrid: document.getElementById('tool-selection-grid'),
+            configTitle: document.getElementById('config-title'),
+            bookmarkletName: document.getElementById('bookmarkletName'),
+            configContainer: document.getElementById('config-container'),
+            generateBtn: document.getElementById('generateBtn'),
+            backBtn: document.getElementById('backBtn'),
+            step3Container: document.getElementById('step3'),
+        };
+    },
+    addEventListeners() {
+        this.elements.generateBtn.addEventListener('click', () => this.generateBookmarklet());
+        this.elements.backBtn.addEventListener('click', () => this.goBack());
+    },
+    showStep(stepNumber) {
+        this.elements.steps.forEach(s => s.classList.remove('active'));
+        document.getElementById(`step${stepNumber}`).classList.add('active');
+    },
+    buildToolSelection() {
+        this.elements.toolSelectionGrid.innerHTML = '';
+        for (const [key, tool] of Object.entries(TOOL_REGISTRY)) {
+            const button = document.createElement('button');
+            button.className = 'group text-left p-6 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200';
+            button.innerHTML = `<h3 class="font-semibold text-lg text-slate-800">${tool.title}</h3><p class="text-slate-500 mt-1">${tool.description}</p>`;
+            button.addEventListener('click', () => this.selectTool(key));
+            this.elements.toolSelectionGrid.appendChild(button);
+        }
+    },
+    selectTool(key) {
+        this.state.activeToolKey = key;
+        const tool = TOOL_REGISTRY[key];
+        this.elements.configTitle.textContent = `Configure: ${tool.title}`;
+        this.elements.bookmarkletName.value = tool.title.replace(' Builder', '');
+        this.elements.configContainer.innerHTML = tool.buildConfigUI();
+        this.showStep(2);
+        this.elements.bookmarkletName.focus();
+    },
+    getConfig() {
+        const toolKey = this.state.activeToolKey;
+        const configs = {
+            report_builder: () => ({
+                filterField: document.getElementById('filterField').value.trim(),
+                filterKeywords: document.getElementById('filterKeywords').value.split(',').map(k => k.trim().toLowerCase()).filter(Boolean),
+                extractField: document.getElementById('extractField').value.trim()
+            }),
+            deferred_updater: () => ({ commentField: document.getElementById('commentField').value })
+        };
+        if (!configs[toolKey]) throw new Error("Invalid tool selected.");
+        return configs[toolKey]();
+    },
+    generateBookmarklet() {
+        this.elements.generateBtn.disabled = true;
+        try {
+            const tool = TOOL_REGISTRY[this.state.activeToolKey];
+            const name = (this.elements.bookmarkletName.value || '').trim() || 'My Bookmarklet';
+            const config = this.getConfig();
+            const rawScript = tool.generateScript(config);
+            
+            const minifyScript = (script) => script
+                .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+                .replace(/\/\/.*$/gm, '')       // Remove line comments
+                .replace(/\s*([{}();,=])\s*/g, '$1') // Remove spaces around operators
+                .replace(/\s+/g, ' ')           // Collapse whitespace
+                .replace(/;\s*}/g, '}')          // Remove semicolons before closing braces
+                .trim();
+            
+            const minifiedScript = encodeURIComponent(minifyScript(rawScript));
+            
+            this.state.finalCode = `javascript:${minifiedScript}`;
+            this.buildResultsPage(this.state.finalCode, name, tool.instructions);
+            this.showStep(3);
+        } catch (error) {
+            showToast(error.message, 'error');
+            console.error("Bookmarklet generation error:", error);
+        } finally {
+            this.elements.generateBtn.disabled = false;
+        }
+    },
+    buildResultsPage(href, name, instructions) {
+       const container = this.elements.step3Container;
+       container.innerHTML = `
+           <h2 class="text-2xl font-semibold mb-4 text-center text-slate-700">Get Your Bookmarklet!</h2>
+           <div class="bg-slate-100 p-6 rounded-lg text-center">
+               <p class="font-medium text-slate-600">Drag the blue link to your browser's bookmarks bar.</p>
+               <div class="my-4 flex justify-center"><a id="bookmarklet-link" href="${href}" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700">${name}</a></div>
+               <div class="flex justify-center gap-2 mt-4">
+                   <button id="copyBtn" class="px-4 py-1.5 text-sm bg-slate-600 text-white rounded-md hover:bg-slate-700">Copy Code</button>
+               </div>
+           </div>
+           <div class="mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md">${instructions || 'Run the generated bookmarklet on the appropriate ServiceNow page.'}</div>
+           <div class="mt-6 text-center"><button id="startOverBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Create Another</button></div>`;
+       
+       const bookmarkletLink = container.querySelector('#bookmarklet-link');
+       const copyBtn = container.querySelector('#copyBtn');
+       const startOverBtn = container.querySelector('#startOverBtn');
+
+       bookmarkletLink.addEventListener('click', (e) => e.preventDefault());
+       copyBtn.addEventListener('click', () => this.copyCode());
+       startOverBtn.addEventListener('click', () => this.goBack());
+    },
+    goBack() {
+        this.state = { activeToolKey: null, finalCode: null };
+        this.showStep(1);
+    },
+    async copyCode() {
+        if (!this.state.finalCode) return;
+        try {
+            const textArea = document.createElement("textarea"); textArea.value = this.state.finalCode; textArea.style.position = "fixed"; textArea.style.left = "-9999px"; document.body.appendChild(textArea); textArea.focus(); textArea.select(); document.execCommand('copy'); document.body.removeChild(textArea);
+            showToast('Copied to clipboard!');
+        } catch (err) {
+            console.error('Failed to copy code: ', err);
+            showToast('Failed to copy code.', 'error');
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => wizard.init());
+</script>
+</body>
+</html>
