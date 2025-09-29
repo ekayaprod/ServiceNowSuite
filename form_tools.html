@@ -17,52 +17,131 @@
         .toast.error { background-color: #ef4444; }
         @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateX(100%); } }
-        .input { @apply mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500; }
-        .form-checkbox { @apply h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500; }
-        .builder-select { @apply text-sm p-1 border border-slate-300 rounded-md shadow-sm; }
+        #cdn-error-notice { display: none; background-color: #ef4444; color: white; padding: 1rem; text-align: center; font-weight: 500; }
     </style>
 </head>
-<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
-
-    <div id="toast-container"></div>
-
-    <div class="container w-full max-w-3xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-slate-800">ServiceNow Form Tools</h1>
-            <p class="text-slate-600 mt-2">Build bookmarklets that run on ServiceNow forms.</p>
-             <a href="index.html" class="text-blue-600 hover:underline mt-2 inline-block">&larr; Back to Home</a>
-        </header>
-
-        <main id="app-container" class="bg-white p-8 rounded-2xl shadow-lg">
-            <!-- Step 1: Choose Tool -->
-            <div id="step1" class="step active">
-                <h2 class="text-2xl font-semibold text-slate-800 mb-6">Step 1: Choose a Tool to Build</h2>
-                <div id="tool-selection-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4"></div>
-            </div>
-
-            <!-- Step 2: Configure -->
-            <div id="step2" class="step">
-                <h2 id="config-title" class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4"></h2>
-                <div id="config-container" class="space-y-6"></div>
-                <div class="mt-6">
-                    <label for="bookmarkletName" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
-                    <input type="text" id="bookmarkletName" class="input">
-                </div>
-                <div class="mt-8 flex justify-between items-center">
-                    <button id="backBtn" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
-                    <button id="generateBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate</button>
-                </div>
-            </div>
-
-            <!-- Step 3: Get Bookmarklet -->
-            <div id="step3" class="step"></div>
-        </main>
+<body class="bg-slate-100">
+    <div id="cdn-error-notice">
+        Could not load critical styles from the CDN. The page may not render correctly. Please check your network connection or ad blocker.
     </div>
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="container w-full max-w-3xl mx-auto">
+            <header class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-slate-800">ServiceNow Bookmarklet Suite</h1>
+                <p class="text-slate-600 mt-2">Build powerful bookmarklets to streamline your ServiceNow workflow.</p>
+                 <a href="index.html" class="text-blue-600 hover:underline mt-2 inline-block">&larr; Back to Home</a>
+            </header>
+
+            <main id="app-container" class="bg-white p-8 rounded-2xl shadow-lg">
+                <!-- Step 1: Choose Tool -->
+                <div id="step1" class="step active">
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-6">Step 1: Choose a Builder</h2>
+                    <div id="tool-selection-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4"></div>
+                </div>
+
+                <!-- Step 2: Configure -->
+                <div id="step2" class="step">
+                    <h2 id="config-title" class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4"></h2>
+                    <div id="config-container" class="space-y-6"></div>
+                    <div class="mt-6">
+                        <label for="bookmarkletName" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
+                        <input type="text" id="bookmarkletName" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="mt-8 flex justify-between items-center">
+                        <button id="backBtn" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
+                        <button id="generateBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Get Bookmarklet -->
+                <div id="step3" class="step"></div>
+            </main>
+        </div>
+    </div>
+    <div id="toast-container"></div>
 
 <script>
 /***************************************************************************************************
- * ServiceNow Bookmarklet Suite - Form Tools (Corrected)
+ * ServiceNow Bookmarklet Suite - Form Tools (Hardened & Renamed)
  ***************************************************************************************************/
+
+// Self-contained UI module to be injected into bookmarklets, removing reliance on alert/prompt
+const SN_UI_MODULE = `
+const SN_UI = {
+    _createModal(id, contentHtml) {
+        const existing = document.getElementById(id);
+        if (existing) existing.remove();
+        
+        const modalEl = document.createElement('div');
+        modalEl.id = id;
+        modalEl.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;';
+        
+        const modalContent = \`
+            <div style="width:90%;max-width:450px;background:#fff;color:#000;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);display:flex;flex-direction:column;">
+                \${contentHtml}
+            </div>
+        \`;
+        modalEl.innerHTML = modalContent;
+        document.body.appendChild(modalEl);
+        return modalEl;
+    },
+    
+    showInfo(title, message) {
+        return new Promise((resolve) => {
+            const id = 'sn-modal-' + Date.now();
+            const content = \`
+                <h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0;font-size:1.1em;">\${title}</h3>
+                <div style="padding:20px;line-height:1.5;">\${message}</div>
+                <div style="padding:20px;border-top:1px solid #ccc;display:flex;justify-content:flex-end;gap:10px;">
+                    <button id="\${id}-ok-btn" style="padding:8px 16px;border:none;border-radius:6px;background:#0066cc;color:white;cursor:pointer;">OK</button>
+                </div>
+            \`;
+            const modal = this._createModal(id, content);
+            document.getElementById(\`\${id}-ok-btn\`).onclick = () => {
+                modal.remove();
+                resolve();
+            };
+        });
+    },
+
+    prompt(title, message, defaultValue = '') {
+        return new Promise((resolve) => {
+            const id = 'sn-modal-' + Date.now();
+            const content = \`
+                <h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0;font-size:1.1em;">\${title}</h3>
+                <div style="padding:20px;">
+                    <p style="margin:0 0 10px;">\${message}</p>
+                    <input type="text" id="\${id}-input" value="\${defaultValue}" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;">
+                </div>
+                <div style="padding:20px;border-top:1px solid #ccc;display:flex;justify-content:flex-end;gap:10px;">
+                    <button id="\${id}-cancel-btn" style="padding:8px 16px;border:1px solid #ccc;border-radius:6px;background:#eee;color:black;cursor:pointer;">Cancel</button>
+                    <button id="\${id}-ok-btn" style="padding:8px 16px;border:none;border-radius:6px;background:#0066cc;color:white;cursor:pointer;">OK</button>
+                </div>
+            \`;
+            const modal = this._createModal(id, content);
+            const inputEl = document.getElementById(\`\${id}-input\`);
+            inputEl.focus();
+            inputEl.select();
+
+            const okAction = () => {
+                modal.remove();
+                resolve(inputEl.value);
+            };
+            const cancelAction = () => {
+                modal.remove();
+                resolve(null);
+            };
+
+            document.getElementById(\`\${id}-ok-btn\`).onclick = okAction;
+            document.getElementById(\`\${id}-cancel-btn\`).onclick = cancelAction;
+            inputEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') okAction();
+                if (e.key === 'Escape') cancelAction();
+            });
+        });
+    }
+};
+`;
 
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
@@ -73,57 +152,32 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.remove(), 5000);
 }
 
-const SN_LOGIC = {
-    findEnv: function(win) {
-        try {
-            function findFrameInShadow(rootNode) { let found = rootNode.querySelector('#gsft_main, iframe[name="gsft_main"]'); if (found) return found; const allElements = rootNode.querySelectorAll('*'); for (const el of allElements) { if (el.shadowRoot) { found = findFrameInShadow(el.shadowRoot); if (found) return found; } } return null; }
-            function getEnv(targetWin) { if (!targetWin) return null; if (targetWin.g_form && typeof targetWin.g_form.getTableName === 'function') { return { type: 'form', context: { win: targetWin, g_form: targetWin.g_form } }; } const listEl = targetWin.document.querySelector('#task_table, .list_table, [data-list_id]'); if (listEl) { return { type: 'list', context: { win: targetWin, listEl: listEl } }; } return null; }
-            const frameEl = findFrameInShadow(win.document);
-            if (frameEl && frameEl.contentWindow) {
-                try {
-                    const frameEnv = getEnv(frameEl.contentWindow);
-                    if (frameEnv) return frameEnv;
-                } catch(e) { 
-                    console.debug('Cross-origin frame access blocked (expected):', e.message); 
-                }
-            }
-            return getEnv(win);
-        } catch (e) { console.error('Error finding ServiceNow environment:', e); }
-        return null;
-    },
-    parseDate: function(d) {
-        if (!d) return null;
-        try {
-            let date = new Date(d);
-            if (!isNaN(date.getTime())) return date;
-            date = new Date(d.replace(/-/g, '/') + ' 00:00:00');
-            return isNaN(date.getTime()) ? null : date;
-        } catch (e) { return null; }
-    }
-};
-
 const TOOL_REGISTRY = {
-    form_filler: {
-        title: "Form Filler Builder",
-        description: "For empty ticket forms. Click fields on a blank form to build a one-click filler tool.",
-        instructions: "Run the generated bookmarklet on a blank ServiceNow form. A panel will appear. Click on form fields to add them to the builder, then generate your final, reusable filler tool.",
+    ticket_template: {
+        title: "Ticket Template Builder",
+        description: "For creating new tickets. Build a reusable template to instantly populate fields on any new ticket form.",
+        instructions: "Run the builder bookmarklet on a blank ServiceNow form. A panel will appear. Click form fields to add them, then generate your final 'Ticket Template' bookmarklet.",
         buildConfigUI: () => `
-            <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">This creates a builder tool that you run on a ServiceNow form. Click form fields to add them to your filler bookmarklet.</div>
+            <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">This creates a builder tool. Run it on a ServiceNow form, click fields to add them to your template, then generate the final bookmarklet.</div>
             <div>
                 <h4 class="text-md font-semibold text-slate-800 mb-3">Options</h4>
-                <label class="flex items-center"><input type="checkbox" id="two_click" class="form-checkbox"><span class="ml-2 text-sm text-slate-600">Two-click mode (opens form in new tab first)</span></label>
+                <label class="flex items-center"><input type="checkbox" id="two_click" class="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"><span class="ml-2 text-sm text-slate-600">Two-click mode (opens form in new tab first)</span></label>
             </div>`,
         generateScript: (cfg) => {
             const findEnvFn = `function(w){try{function e(t){let n=t.querySelector("#gsft_main,iframe[name=gsft_main]");if(n)return n;const o=t.querySelectorAll("*");for(const r of o)if(r.shadowRoot&&(n=e(r.shadowRoot)))return n;return null}function t(n){return n?n.g_form&&"function"==typeof n.g_form.getTableName?{type:"form",context:{win:n,g_form:n.g_form}}:n.document.querySelector("#task_table,.list_table,[data-list_id]")?{type:"list",context:{win:n,listEl:n.document.querySelector("#task_table,.list_table,[data-list_id]")}}:null:null}const n=e(w.document);if(n&&n.contentWindow){try{const o=t(n.contentWindow);if(o)return o}catch(o){console.debug("Cross-origin frame access blocked (expected):",o.message)}}return t(w)}catch(o){return console.error("Error finding ServiceNow environment:",o),null}}`;
-            return '(function(){' +
-                'const cfg = ' + JSON.stringify(cfg) + ';' +
+            const waitForGFormFn = `(win)=>new Promise((resolve,reject)=>{let attempts=0;const check=()=>{if(win&&win.g_form&&typeof win.g_form.getValue==='function'){resolve(win.g_form)}else if(attempts++<50){setTimeout(check,100)}else{reject(new Error('g_form not available'))}};check()})`;
+            
+            return '(async function(){' +
+                SN_UI_MODULE +
                 'const findEnv = ' + findEnvFn + ';' +
+                'const waitForGForm = ' + waitForGFormFn + ';' +
+                'const cfg = ' + JSON.stringify(cfg) + ';' +
                 `const builder = {
                     fields: [],
                     panelId: 'sffp-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-                    init() {
+                    async init() {
                         const env = findEnv(window.top);
-                        if (!env || env.type !== 'form') { alert('This tool must be run on a ServiceNow form page. Please navigate to a form (like incident.do) and try again.'); return; }
+                        if (!env || env.type !== 'form') { await SN_UI.showInfo('Tool Error', 'This tool must be run on a ServiceNow form page. Please navigate to a form (like incident.do) and try again.'); return; }
                         if(env.context.win.document.getElementById(this.panelId)) return;
                         this.g_form = env.context.g_form;
                         this.win = env.context.win;
@@ -132,7 +186,7 @@ const TOOL_REGISTRY = {
                     },
                     buildUI() {
                         const panelStyles = 'position:fixed;top:5%;left:50%;transform:translateX(-50%);width:90%;max-width:600px;background:#fff;color:#000;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:999999;font-family:sans-serif';
-                        const panelHTML = \`<div id="\${this.panelId}" style="\${panelStyles}"><h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:8px 8px 0 0">Form Filler Builder</h3><div style="padding:20px"><p style="margin:0 0 15px">Click form fields to add them.</p><div id="\${this.panelId}-list" style="border:1px solid #ccc;border-radius:6px;max-height:300px;overflow-y:auto;margin:15px 0"></div><div style="display:flex;gap:10px;justify-content:center"><button id="\${this.panelId}-gen">Generate</button><button id="\${this.panelId}-close">Close</button></div><div id="\${this.panelId}-result" style="display:none;margin-top:20px;text-align:center"></div></div></div>\`;
+                        const panelHTML = \`<div id="\${this.panelId}" style="\${panelStyles}"><h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:8px 8px 0 0">Template Builder</h3><div style="padding:20px"><p style="margin:0 0 15px">Click form fields to add them to your template.</p><div id="\${this.panelId}-list" style="border:1px solid #ccc;border-radius:6px;max-height:300px;overflow-y:auto;margin:15px 0"></div><div style="display:flex;gap:10px;justify-content:center"><button id="\${this.panelId}-gen">Generate Template</button><button id="\${this.panelId}-close">Close</button></div><div id="\${this.panelId}-result" style="display:none;margin-top:20px;text-align:center"></div></div></div>\`;
                         this.win.document.body.insertAdjacentHTML('beforeend', panelHTML);
                         this.updateUI();
                         this.win.document.getElementById(this.panelId + '-gen').onclick = () => this.generate();
@@ -144,173 +198,255 @@ const TOOL_REGISTRY = {
                         if (!listEl) return;
                         listEl.innerHTML = this.fields.length ? this.fields.map((f, i) => \`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #ccc"><div style="flex:1;font-size:0.9em"><b>\${f.label}</b><br><span style="opacity:0.8">(\${f.name})</span></div><input value="\${f.value.replace(/"/g, '&quot;')}" onchange="window.formBuilder.update(\${i}, this.value)" style="flex:2;padding:6px;border:1px solid #ccc;margin:0 8px;background:#fff;color:#000;border-radius:4px;"><button onclick="window.formBuilder.remove(\${i})">&times;</button></div>\`).join('') : '<div style="padding:20px;text-align:center;opacity:0.7;">Click fields to add</div>';
                     },
-                    clickHandler: function(e) {
+                    clickHandler(e) {
                         try {
                             if (e.target.closest('#' + this.panelId)) return;
                             const el = e.target.closest('div.form-group,tr[data-form-type]');
                             if (!el) return;
-                            e.preventDefault();
-                            e.stopPropagation();
+                            e.preventDefault(); e.stopPropagation();
                             let input = el.querySelector('select, input:not([type="hidden"]), textarea') || e.target.closest('select, input:not([type="hidden"]), textarea');
                             if (!input) { const refField = el.querySelector('[data-ref-id], [data-reference]'); if (refField) { input = refField; } }
                             if (!input) return;
-                            
                             const originalName = input.getAttribute('data-sn-name') || input.name || input.id;
-
-                            const cleanFieldName = (name) => {
-                                let cleaned = name.replace(/^sys_display\\./, '');
-                                cleaned = cleaned.replace(/^[a-z_]+\\./, '');
-                                return cleaned;
-                            };
+                            const cleanFieldName = (name) => name.replace(/^sys_display\\./, '').replace(/^[a-z_]+\\./, '');
                             const cleanName = cleanFieldName(originalName);
-
-                            if (!cleanName || !this.g_form.hasField(cleanName) || this.fields.find(f => f.name === cleanName)) { return; }
-                            
-                            let domValue = null; let domDisplayValue = null;
-                            if (input.tagName === 'SELECT') { domValue = input.value; domDisplayValue = input.selectedOptions[0] && input.selectedOptions[0].textContent.trim(); } 
+                            if (!cleanName || !this.g_form.hasField(cleanName) || this.fields.find(f => f.name === cleanName)) return;
+                            let domValue = null, domDisplayValue = null;
+                            if (input.tagName === 'SELECT') { domValue = input.value; domDisplayValue = input.selectedOptions[0]?.textContent.trim(); } 
                             else if (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') { 
                                 domValue = input.value; 
-                                const displayInput = el.querySelector(\`input[id="\${originalName}_display"], input[name="\${originalName}_display"]\`) || el.querySelector('input[id*="sys_display"][name*="sys_display"]:not([type="hidden"])');
+                                const displayInput = el.querySelector(\`input[id="\${originalName}_display"], input[name="\${originalName}_display"]\`) || el.querySelector('input[id*="sys_display"]:not([type="hidden"])');
                                 domDisplayValue = (displayInput?.value && displayInput.value !== domValue) ? displayInput.value.trim() : null;
                             }
-                            
                             const finalValue = this.g_form.getValue(cleanName) || domValue || '';
                             let finalDisplayValue = this.g_form.getDisplayValue(cleanName);
-                            if (!finalDisplayValue || (finalDisplayValue === finalValue)) { finalDisplayValue = domDisplayValue; }
-
-                            let cleanDisplayValue = null; const recordIdentifier = this.g_form.getValue('number') || this.g_form.getDisplayValue('sys_id');
-                            if (finalDisplayValue && finalDisplayValue !== finalValue) { if (finalDisplayValue !== recordIdentifier) { cleanDisplayValue = finalDisplayValue; } }
-                            this.fields.push({ name: cleanName, originalName: originalName, label: this.g_form.getLabelOf(cleanName) || cleanName, value: finalValue, displayValue: cleanDisplayValue });
+                            if (!finalDisplayValue || (finalDisplayValue === finalValue)) finalDisplayValue = domDisplayValue;
+                            let cleanDisplayValue = null;
+                            const recordIdentifier = this.g_form.getValue('number') || this.g_form.getDisplayValue('sys_id');
+                            if (finalDisplayValue && finalDisplayValue !== finalValue && finalDisplayValue !== recordIdentifier) cleanDisplayValue = finalDisplayValue;
+                            this.fields.push({ name: cleanName, label: this.g_form.getLabelOf(cleanName) || cleanName, value: finalValue, displayValue: cleanDisplayValue });
                             this.updateUI();
-                        } catch (error) {
-                            console.warn('Field capture failed:', error.message);
-                        }
+                        } catch (error) { console.warn('Field capture failed:', error.message); }
                     },
                     update(i, v) { this.fields[i] && (this.fields[i].value = v); },
                     remove(i) { this.fields.splice(i, 1); this.updateUI(); },
-                    generate() {
-                        if (!this.fields.length) { alert('Add at least one field.'); return; }
-                        const name = prompt('Bookmarklet name:', 'Form Filler') || 'Form Filler';
-                        let formUrl = cfg.twoClick ? window.top.location.href : '';
+                    async generate() {
+                        if (!this.fields.length) { await SN_UI.showInfo('Builder Info', 'Please add at least one field before generating.'); return; }
+                        const name = await SN_UI.prompt('Final Touches', 'Enter a name for your new Ticket Template:', 'New Incident Template');
+                        if (!name) return;
+                        
                         let logic = 'const fields = ' + JSON.stringify(this.fields) + ';';
-                        if (cfg.twoClick) { const baseFormUrl = formUrl.split('?')[0].split('%3F')[0]; logic += "const targetUrl = '" + formUrl + "';const baseTarget = '" + baseFormUrl + "';const cleanCurrent = decodeURIComponent(window.location.href).split('?')[0];if(!cleanCurrent.includes('incident.do') && !cleanCurrent.includes('new_call.do')){window.open(targetUrl,'_blank');return;}"; }
-                        logic += " const DEPENDENCY_DELAY_MS=1500; const findForm=()=>{const frame=window.frames['gsft_main'];return frame&&frame.g_form?frame.g_form:null};const g_form=findForm();if(!g_form){alert('ServiceNow form (g_form) not accessible. Ensure you are on a form page.');return}const deps=['assignment_group','u_owner_group','caller_id'];const setField=f=>{if(g_form.hasField(f.name)){g_form.setValue(f.name,f.value,f.displayValue||undefined)}};fields.forEach(f=>{if(!deps.includes(f.name)){setField(f)}});setTimeout(()=>{fields.forEach(f=>{if(deps.includes(f.name)){setField(f)}})},DEPENDENCY_DELAY_MS);";
-                        const code = 'javascript:(function(){' + logic + '})()';
-                        const link = this.win.document.createElement('a'); link.href = code; link.textContent = name; link.style.cssText = 'display:inline-block;padding:12px 24px;background:#0066cc;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;margin:10px 0';
+                        if (cfg.twoClick) { logic += "const targetUrl = '" + window.top.location.href + "'; if (!decodeURIComponent(window.location.href).split('?')[0].includes(targetUrl.split('?')[0])) { window.open(targetUrl, '_blank'); return; }"; }
+                        logic += " (async () => { try { const env = findEnv(window.top); if (!env || !env.context.win) { throw new Error('Could not find ServiceNow form environment.'); } const g_form = await waitForGForm(env.context.win); const deps=['assignment_group','u_owner_group','caller_id']; const setField=f=>{if(g_form.hasField(f.name)){g_form.setValue(f.name,f.value,f.displayValue||undefined)}}; fields.forEach(f=>{if(!deps.includes(f.name)){setField(f)}}); setTimeout(()=>{fields.forEach(f=>{if(deps.includes(f.name)){setField(f)}})},1500); } catch(e) { await SN_UI.showInfo('Execution Error', 'Could not apply template: ' + e.message); } })();";
+                        
+                        const finalCode = 'javascript:(async function(){' + SN_UI_MODULE + 'const findEnv=' + findEnvFn + ';const waitForGForm=' + waitForGFormFn + ';' + logic + '})()';
+
+                        const link = this.win.document.createElement('a'); link.href = finalCode; link.textContent = name; link.style.cssText = 'display:inline-block;padding:12px 24px;background:#0066cc;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;margin:10px 0';
                         const resDiv = this.win.document.getElementById(this.panelId + '-result'); resDiv.innerHTML = '<p><strong>Success!</strong> Drag this link to your bookmarks bar:</p>'; resDiv.appendChild(link); resDiv.style.display = 'block';
                     },
-                    close() { this.win.document.removeEventListener('click', this.clickHandler, true); this.win.document.getElementById(this.panelId).remove(); delete this.win.formBuilder; }
+                    close() { this.win.document.removeEventListener('click', this.clickHandler, true); this.win.document.getElementById(this.panelId)?.remove(); delete this.win.formBuilder; }
                 };
                 builder.init();` +
             '})()';
         }
     },
-    field_modifier: {
-        title: "Field Modifier Builder",
-        description: "For editing existing tickets. Build rules to modify any field, individually or in batches.",
-        instructions: "Run the generated bookmarklet on a ServiceNow form to open the rule builder. Define your rules, then generate your final, reusable modification tool.",
+    ticket_automation: {
+        title: "Ticket Automation Builder",
+        description: "For working on existing tickets. Build rule-based automations to modify, assign, or update tickets, one by one or in batches.",
+        instructions: "Run the builder bookmarklet on a ServiceNow form to open the rule builder. Define your rules, then generate your final 'Ticket Automation' bookmarklet.",
         buildConfigUI: () => `
-            <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">This creates a builder tool that you run on a ServiceNow form to define rules for modifying any field.</div>
+            <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">This creates a builder tool. Run it on a ServiceNow form to define rules for your automation, then generate the final bookmarklet.</div>
             <div>
                 <h4 class="text-md font-semibold text-slate-800 mb-3">Options</h4>
-                <label class="flex items-center"><input type="checkbox" id="batch_mode" class="form-checkbox"><span class="ml-2 text-sm text-slate-600">Enable Batch Processing (for List View)</span></label>
+                <label class="flex items-center"><input type="checkbox" id="batch_mode" class="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"><span class="ml-2 text-sm text-slate-600">Enable Batch Processing (for List View)</span></label>
             </div>`,
         generateScript: (cfg) => {
             const findEnvFn = `function(w){try{function e(t){let n=t.querySelector("#gsft_main,iframe[name=gsft_main]");if(n)return n;const o=t.querySelectorAll("*");for(const r of o)if(r.shadowRoot&&(n=e(r.shadowRoot)))return n;return null}function t(n){return n?n.g_form&&"function"==typeof n.g_form.getTableName?{type:"form",context:{win:n,g_form:n.g_form}}:n.document.querySelector("#task_table,.list_table,[data-list_id]")?{type:"list",context:{win:n,listEl:n.document.querySelector("#task_table,.list_table,[data-list_id]")}}:null:null}const n=e(w.document);if(n&&n.contentWindow){try{const o=t(n.contentWindow);if(o)return o}catch(o){console.debug("Cross-origin frame access blocked (expected):",o.message)}}return t(w)}catch(o){return console.error("Error finding ServiceNow environment:",o),null}}`;
             const parseDateFn = `function(t){if(!t)return null;try{let e=new Date(t);return isNaN(e.getTime())?(e=new Date(t.replace(/-/g,"/")+" 00:00:00"),isNaN(e.getTime())?null:e):e}catch(e){return null}}`;
-            return '(function(){' +
-                'const findEnv = ' + findEnvFn + '; const parseDate = ' + parseDateFn + ';' +
+            const waitForGFormFn = `(win)=>new Promise((resolve,reject)=>{let attempts=0;const check=()=>{if(win&&win.g_form&&typeof win.g_form.getValue==='function'){resolve(win.g_form)}else if(attempts++<50){setTimeout(check,100)}else{reject(new Error('g_form not available'))}};check()})`;
+
+            return '(async function(){' +
+                SN_UI_MODULE +
+                'const findEnv = ' + findEnvFn + '; const parseDate = ' + parseDateFn + '; const waitForGForm = ' + waitForGFormFn + ';' +
+                'const cfg = ' + JSON.stringify(cfg) + ';' +
                 `const builder = {
-                    fields: [], rules: [], config: { targetField: 'short_description', actionType: 'append' }, 
-                    panelId: 'sfmb-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-                    fieldCache: null,
-                    init() {
-                        const env = findEnv(window.top); 
-                        if (!env || env.type !== 'form') { alert('This tool must be run on a ServiceNow form to build your rules. Please navigate to a form (like incident.do) and try again.'); return; }
-                        if(env.context.win.document.getElementById(this.panelId)) return;
+                    fields: [], rules: [], config: { targetField: 'short_description' },
+                    panelId: 'sfmb-' + Date.now(),
+                    async init() {
+                        const env = findEnv(window.top);
+                        if (!env || env.type !== 'form') { await SN_UI.showInfo('Tool Error', 'This tool must be run on a ServiceNow form to build your rules. Please navigate to a form (like incident.do) and try again.'); return; }
+                        if (env.context.win.document.getElementById(this.panelId)) return;
                         this.g_form = env.context.g_form; this.win = env.context.win; this.scanFields(); this.buildUI();
                     },
                     scanFields() {
-                        if (this.fieldCache && this.fieldCache.size > 0) return;
                         if (!this.g_form.elements) return;
-                        this.fieldCache = new Map();
+                        const fieldCache = new Map();
                         this.fields = this.g_form.elements.map(el => {
                             const name = el.fieldName;
-                            if (!this.fieldCache.has(name)) {
-                                const field = this.g_form.getField(name);
-                                if (!field) return null;
-                                this.fieldCache.set(name, {
-                                    type: field.type,
-                                    label: this.g_form.getLabelOf(name),
-                                    isDate: field.type.includes('date'),
-                                    isBool: ['boolean', 'true_false', 'checkbox'].includes(field.type)
-                                });
-                            }
-                            const cached = this.fieldCache.get(name);
-                            const value = this.g_form.getValue(name);
-                            return { name, value, ...cached };
-                        }).filter(f => f && f.name && f.label && (f.value || f.isBool));
+                            if (fieldCache.has(name)) return null;
+                            const field = this.g_form.getField(name);
+                            if (!field) return null;
+                            fieldCache.set(name, true);
+                            return {
+                                name,
+                                label: this.g_form.getLabelOf(name),
+                                type: field.type,
+                                isDate: field.type.includes('date'),
+                                isBool: ['boolean', 'true_false', 'checkbox'].includes(field.type)
+                            };
+                        }).filter(f => f && f.name && f.label);
                     },
                     buildUI() {
                         const fieldOptions = this.fields.map(f => \`<option value="\${f.name}">\${f.label} (\${f.name})</option>\`).join('');
-                        const panelHTML = \`<div id="\${this.panelId}" style="position:fixed;top:5%;left:50%;transform:translateX(-50%);width:90%;max-width:800px;background:#fff;color:#000;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:999999;font-family:sans-serif;display:flex;flex-direction:column;"><h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:8px 8px 0 0">Field Modifier Rule Builder</h3><div style="padding:20px;overflow-y:auto;flex-grow:1;"><div style="padding:10px;background:#f0f5ff;border-radius:6px;margin-bottom:15px;display:flex;align-items:center;gap:15px;"><strong>Action:</strong> <select id="\${this.panelId}-action" class="builder-select" onchange="window.fieldModifier.updateConfig('actionType', this.value)"><option value="append">Append to End</option><option value="prepend">Prepend to Start</option><option value="replace">Replace Text</option><option value="overwrite">Overwrite</option></select> <strong>Target Field:</strong> <select id="\${this.panelId}-target" class="builder-select" onchange="window.fieldModifier.updateConfig('targetField', this.value)">\${fieldOptions.replace(\`value="short_description"\`,\`value="short_description" selected\`)}</select></div><p style="margin:0 0 15px">Define rules to trigger the action above.</p><div id="\${this.panelId}-rules" style="border:1px solid #ccc;border-radius:6px;max-height:40vh;overflow-y:auto;"></div><div style="margin-top:15px;"><button id="\${this.panelId}-add">Add Rule</button></div></div><div style="padding:20px;border-top:1px solid #ccc;display:flex;gap:10px;justify-content:center"><button id="\${this.panelId}-gen">Generate Bookmarklet</button><button id="\${this.panelId}-close">Close</button></div><div id="\${this.panelId}-result" style="display:none;padding:0 20px 20px;text-align:center"></div></div>\`;
+                        const panelHTML = \`<div id="\${this.panelId}" style="position:fixed;top:5%;left:50%;transform:translateX(-50%);width:90%;max-width:800px;background:#fff;color:#000;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:999999;font-family:sans-serif;display:flex;flex-direction:column;"><h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:8px 8px 0 0">Automation Rule Builder</h3><div style="padding:20px;overflow-y:auto;flex-grow:1;"><div style="padding:10px;background:#f0f5ff;border-radius:6px;margin-bottom:15px;display:flex;align-items:center;gap:15px;"><strong>Global Target Field:</strong> <select id="\${this.panelId}-target" class="text-sm p-1 border border-slate-300 rounded-md shadow-sm" onchange="window.fieldModifier.updateConfig('targetField', this.value)">\${fieldOptions.replace(\`value="short_description"\`,\`value="short_description" selected\`)}</select></div><p style="margin:0 0 15px">Define rules to trigger actions. The final action can modify the global target field, or you can use "Set a Field" for more specific changes.</p><div id="\${this.panelId}-rules" style="border:1px solid #ccc;border-radius:6px;max-height:40vh;overflow-y:auto;"></div><div style="margin-top:15px;"><button id="\${this.panelId}-add">Add Rule</button></div></div><div style="padding:20px;border-top:1px solid #ccc;display:flex;gap:10px;justify-content:center"><button id="\${this.panelId}-gen">Generate Automation</button><button id="\${this.panelId}-close">Close</button></div><div id="\${this.panelId}-result" style="display:none;padding:0 20px 20px;text-align:center"></div></div>\`;
                         this.win.document.body.insertAdjacentHTML('beforeend', panelHTML);
                         this.win.document.getElementById(this.panelId + '-add').onclick = () => this.addRule(); this.win.document.getElementById(this.panelId + '-gen').onclick = () => this.generateFinalBookmarklet(); this.win.document.getElementById(this.panelId + '-close').onclick = () => this.close(); this.win.fieldModifier = this; this.renderRules();
                     },
                     renderRules() {
                         const listEl = this.win.document.getElementById(this.panelId + '-rules'); if (!listEl) return; if (!this.rules.length) { listEl.innerHTML = '<div style="padding:20px;text-align:center;opacity:0.7;">No rules defined. Click "Add Rule" to start.</div>'; return; }
-                        const fieldOptions = this.fields.map(f => \`<option value="\${f.name}">\${f.label} (\${f.name})</option>\`).join(''); const conditionOptions = \`<option value="equals">equals</option><option value="contains">contains</option><option value="not_contains">does not contain</option><option value="starts_with">starts with</option><option value="not_empty">is not empty</option>\`;
-                        listEl.innerHTML = this.rules.map((rule, i) => {
-                            const selectedField = this.fields.find(f => f.name === rule.field); 
-                            let conditionHTML = '';
-                            if (selectedField) {
-                                if (selectedField.isBool) {
-                                    conditionHTML = \` is <select class="builder-select" onchange="window.fieldModifier.updateRule(\${i}, 'conditionValue', this.value)"><option value="true" \${rule.conditionValue === 'true' ? 'selected' : ''}>True/Yes</option><option value="false" \${rule.conditionValue === 'false' ? 'selected' : ''}>False/No</option></select>\`;
-                                } else if (selectedField.isDate) {
-                                    conditionHTML = \` has any value\`;
-                                } else {
-                                    const conditionInputStyle = \`width:80px;padding:2px;\${rule.operator === 'not_empty' ? 'display:none;' : ''}\`;
-                                    conditionHTML = \`<select class="builder-select" onchange="window.fieldModifier.updateRule(\${i}, 'operator', this.value)">\${conditionOptions.replace(\`value="\${rule.operator}"\`, \`value="\${rule.operator}" selected\`)}</select> <input type="text" value="\${rule.conditionValue}" onchange="window.fieldModifier.updateRule(\${i}, 'conditionValue', this.value)" style="\${conditionInputStyle}">\`;
-                                }
-                            }
-                            let actionHTML = '';
-                            if (this.config.actionType === 'replace') {
-                                actionHTML = \`Find: <input type="text" value="\${rule.findText || ''}" onchange="window.fieldModifier.updateRule(\${i}, 'findText', this.value)" style="width:80px;padding:2px;"> With: <input type="text" value="\${rule.replaceText || ''}" onchange="window.fieldModifier.updateRule(\${i}, 'replaceText', this.value)" style="width:80px;padding:2px;">\`;
-                            } else {
-                                const textLabel = this.config.actionType === 'overwrite' ? 'New Text' : (selectedField && selectedField.isDate ? 'Date Format' : 'Text to Add');
-                                const textPlaceholder = selectedField && selectedField.isDate ? 'e.g., - MM-DD' : 'e.g., - PROCESSED';
-                                actionHTML = \`\${textLabel}: <input type="text" value="\${rule.valueText || ''}" onchange="window.fieldModifier.updateRule(\${i}, 'valueText', this.value)" placeholder="\${textPlaceholder}" style="width:120px;padding:2px;">\`;
-                            }
-                            return \`<div style="padding:10px;border-bottom:1px solid #eee;display:grid;grid-template-columns:auto 1fr 1fr auto;gap:10px;align-items:center;font-size:0.9em;"><span>IF</span><div><select class="builder-select" onchange="window.fieldModifier.updateRule(\${i}, 'field', this.value)"><option value="">Select Field</option>\${fieldOptions.replace(\`value="\${rule.field}"\`, \`value="\${rule.field}" selected\`)}</select>\${conditionHTML}</div><div>THEN \${actionHTML}</div><button onclick="window.fieldModifier.removeRule(\${i})">&times;</button></div>\`;
-                        }).join('');
+                        const fieldOptions = this.fields.map(f => \`<option value="\${f.name}">\${f.label} (\${f.name})</option>\`).join('');
+                        listEl.innerHTML = this.rules.map((rule, i) => this._renderRuleRow(rule, i, fieldOptions)).join('');
                     },
-                    updateConfig(key, value) { this.config[key] = value; this.renderRules(); }, addRule() { this.rules.push({ field: '', operator: 'equals', conditionValue: '' }); this.renderRules(); }, removeRule(i) { this.rules.splice(i, 1); this.renderRules(); }, updateRule(index, key, value) { this.rules[index][key] = value; if (key === 'field' || key === 'operator') { this.renderRules(); } },
-                    generateFinalBookmarklet() {
-                        if (!this.rules.length) { alert('Add at least one rule.'); return; } const name = prompt('Final bookmarklet name:', 'Update ' + this.config.targetField) || 'SN Modifier'; const finalLogic = this.getFinalLogic(); const code = 'javascript:(function(){' + finalLogic + '})()';
-                        const link = this.win.document.createElement('a'); link.href = code; link.textContent = name; link.style.cssText = 'display:inline-block;padding:12px 24px;background:#0066cc;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;margin:10px 0'; const resDiv = this.win.document.getElementById(this.panelId + '-result'); resDiv.innerHTML = '<p><strong>Success!</strong> Drag this link to your bookmarks bar:</p>'; resDiv.appendChild(link); resDiv.style.display = 'block';
+                    _renderRuleRow(rule, i, fieldOpts) {
+                        const selectedField = this.fields.find(f => f.name === rule.field);
+                        const commonSelect = 'class="text-sm p-1 border border-slate-300 rounded-md shadow-sm"';
+                        const commonInput = 'style="padding:2px; border:1px solid #ccc; border-radius:4px;"';
+
+                        let conditionHTML = '';
+                        if (selectedField) {
+                            if (selectedField.isBool) conditionHTML = \` is <select \${commonSelect} onchange="window.fieldModifier.updateRule(\${i},'conditionValue',this.value)"><option value="true" \${rule.conditionValue==='true'?'selected':''}>True</option><option value="false" \${rule.conditionValue==='false'?'selected':''}>False</option></select>\`;
+                            else if (selectedField.isDate) conditionHTML = \`<select \${commonSelect} onchange="window.fieldModifier.updateRule(\${i},'operator',this.value)"><option value="not_empty" \${rule.operator==='not_empty'?'selected':''}>has value</option><option value="is_past_or_today" \${rule.operator==='is_past_or_today'?'selected':''}>is past/today</option><option value="is_future" \${rule.operator==='is_future'?'selected':''}>is future</option></select>\`;
+                            else conditionHTML = \`<select \${commonSelect} onchange="window.fieldModifier.updateRule(\${i},'operator',this.value,true)"><option value="equals" \${rule.operator==='equals'?'selected':''}>equals</option><option value="contains" \${rule.operator==='contains'?'selected':''}>contains</option><option value="not_contains" \${rule.operator==='not_contains'?'selected':''}>not contain</option><option value="starts_with" \${rule.operator==='starts_with'?'selected':''}>starts with</option><option value="not_empty" \${rule.operator==='not_empty'?'selected':''}>not empty</option></select> \${rule.operator !== 'not_empty' ? \`<input type="text" \${commonInput} value="\${rule.conditionValue||''}" onchange="window.fieldModifier.updateRule(\${i},'conditionValue',this.value)">\` : ''}\`;
+                        }
+                        
+                        const actionOpts = [{v:'append',l:'Append to Target'},{v:'prepend',l:'Prepend to Target'},{v:'replace',l:'Replace in Target'},{v:'overwrite',l:'Overwrite Target'},{v:'set_field',l:'Set a Field'}];
+                        let actionHTML = \`<select \${commonSelect} onchange="window.fieldModifier.updateRule(\${i},'action',this.value,true)">\${actionOpts.map(o => \`<option value="\${o.v}" \${(rule.action||'append')===o.v?'selected':''}>\${o.l}</option>\`).join('')}</select>\`;
+                        
+                        if (rule.action === 'set_field') actionHTML += \` <select \${commonSelect} onchange="window.fieldModifier.updateRule(\${i},'actionTarget',this.value)">\${fieldOpts.replace(\`value="\${rule.actionTarget}"\`,\`value="\${rule.actionTarget}" selected\`)}</select> to <input type="text" \${commonInput} value="\${rule.actionValue||''}" onchange="window.fieldModifier.updateRule(\${i},'actionValue',this.value)">\`;
+                        else if (rule.action === 'replace') actionHTML += \` Find <input \${commonInput} value="\${rule.findText||''}" onchange="window.fieldModifier.updateRule(\${i},'findText',this.value)"> With <input \${commonInput} value="\${rule.replaceText||''}" onchange="window.fieldModifier.updateRule(\${i},'replaceText',this.value)">\`;
+                        else actionHTML += \` Text <input \${commonInput} value="\${rule.valueText||''}" onchange="window.fieldModifier.updateRule(\${i},'valueText',this.value)" placeholder="\${selectedField?.isDate?'e.g. - MM-DD':''}">\`;
+
+                        return \`<div style="padding:10px;border-bottom:1px solid #eee;display:grid;grid-template-columns:auto 1fr 1.5fr auto;gap:10px;align-items:center;font-size:0.9em;"><span>IF</span><div><select \${commonSelect} onchange="window.fieldModifier.updateRule(\${i},'field',this.value,true)"><option>Select Field</option>\${fieldOpts.replace(\`value="\${rule.field}"\`,\`value="\${rule.field}" selected\`)}</select>\${conditionHTML}</div><div>THEN \${actionHTML}</div><button onclick="window.fieldModifier.removeRule(\${i})">&times;</button></div>\`;
+                    },
+                    updateConfig(k,v){this.config[k]=v;this.renderRules()},addRule(){this.rules.push({field:'',operator:'equals',action:'append'});this.renderRules()},removeRule(i){this.rules.splice(i,1);this.renderRules()},updateRule(i,k,v,r=false){this.rules[i][k]=v;if(r)this.renderRules()},
+                    async generateFinalBookmarklet() {
+                        if (!this.rules.length) { await SN_UI.showInfo('Builder Info', 'Please add at least one rule.'); return; }
+                        const name = await SN_UI.prompt('Final Touches', 'Enter a name for your new Ticket Automation:', 'Update Automation');
+                        if (!name) return;
+
+                        const finalLogic = this.getFinalLogic();
+                        const code = 'javascript:(async function(){' + SN_UI_MODULE + finalLogic + '})()';
+                        
+                        const link = this.win.document.createElement('a'); link.href = code; link.textContent = name; link.style.cssText = 'display:inline-block;padding:12px 24px;background:#0066cc;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;margin:10px 0';
+                        const resDiv = this.win.document.getElementById(this.panelId + '-result'); resDiv.innerHTML = '<p><strong>Success!</strong> Drag this link to your bookmarks bar:</p>'; resDiv.appendChild(link); resDiv.style.display = 'block';
                     },
                     getFinalLogic() {
                         const finalConfig = { ...this.config, rules: this.rules.filter(r => r.field) };
-                        const logicFn = 'function(g_form, cfg){' +
-                            'const parseDate = ' + parseDateFn + ';' +
-                            "let triggered=false,val=g_form.getValue(cfg.targetField)||'',orig=val.trim();for(const rule of cfg.rules){const field=g_form.getField(rule.field);if(!field)continue;const fVal=String(g_form.getValue(rule.field));const type=field.type;const isBool=['boolean','true_false','checkbox'].includes(type);const isDate=type.includes('date');let conditionMet=false;if(isBool){conditionMet=(fVal===rule.conditionValue)}else if(isDate){conditionMet=!!fVal}else{switch(rule.operator){case'equals':conditionMet=(fVal===rule.conditionValue);break;case'contains':conditionMet=fVal.includes(rule.conditionValue);break;case'not_contains':conditionMet=!fVal.includes(rule.conditionValue);break;case'starts_with':conditionMet=fVal.startsWith(rule.conditionValue);break;case'not_empty':conditionMet=(fVal!=='');break;}}if(conditionMet){triggered=true;let modText=rule.valueText||'';if(isDate){const dt=parseDate(fVal);if(dt){modText=modText.replace(/MM/g,String(dt.getMonth()+1).padStart(2,'0')).replace(/DD/g,String(dt.getDate()).padStart(2,'0')).replace(/YYYY/g,dt.getFullYear())}}switch(cfg.actionType){case'append':val=orig+' '+modText;break;case'prepend':val=modText+' '+orig;break;case'replace':val=val.replace(new RegExp(rule.findText,'g'),rule.replaceText);break;case'overwrite':val=modText;break;}break;}}if(!triggered){return{changed:false,info:'No rules matched'};}return{changed:true,info:'Field modified',targetField:cfg.targetField,newValue:val,originalValue:g_form.getValue(cfg.targetField)};" +
-                        '}';
+                        const logicFn = \`async function(g_form, cfg){
+                            const today=new Date(); today.setHours(0,0,0,0);
+                            let changesToApply=new Map();
+                            let targetVal=g_form.getValue(cfg.targetField)||'';
+                            for(const rule of cfg.rules){
+                                const fVal=String(g_form.getValue(rule.field));
+                                const fType=(g_form.getField(rule.field)?.type || '').toLowerCase();
+                                let conditionMet=false;
+                                if (fType.includes('date')) {
+                                    const d=parseDate(fVal);
+                                    if(d){ d.setHours(0,0,0,0);
+                                        if(rule.operator==='is_past_or_today') conditionMet=d<=today;
+                                        else if(rule.operator==='is_future') conditionMet=d>today;
+                                        else conditionMet=true;
+                                    }
+                                } else if (['boolean','true_false'].includes(fType)) {
+                                    conditionMet=(fVal===rule.conditionValue);
+                                } else {
+                                    switch(rule.operator){
+                                        case 'equals': conditionMet=(fVal===rule.conditionValue);break;
+                                        case 'contains': conditionMet=fVal.includes(rule.conditionValue);break;
+                                        case 'not_contains': conditionMet=!fVal.includes(rule.conditionValue);break;
+                                        case 'starts_with': conditionMet=fVal.startsWith(rule.conditionValue);break;
+                                        case 'not_empty': conditionMet=(fVal!=='');break;
+                                    }
+                                }
+                                if(conditionMet){
+                                    if (rule.action === 'set_field') { changesToApply.set(rule.actionTarget, rule.actionValue); }
+                                    else {
+                                        let modText=rule.valueText||'';
+                                        if(fType.includes('date')){ const dt=parseDate(fVal); if(dt) modText=modText.replace(/MM/g,String(dt.getMonth()+1).padStart(2,'0')).replace(/DD/g,String(dt.getDate()).padStart(2,'0')).replace(/YYYY/g,dt.getFullYear()); }
+                                        switch(rule.action){
+                                            case 'append':targetVal+=' '+modText;break;
+                                            case 'prepend':targetVal=modText+' '+targetVal;break;
+                                            case 'replace':targetVal=targetVal.replace(new RegExp(rule.findText,'g'),rule.replaceText);break;
+                                            case 'overwrite':targetVal=modText;break;
+                                        }
+                                    }
+                                }
+                            }
+                            if(targetVal.trim() !== g_form.getValue(cfg.targetField).trim()) changesToApply.set(cfg.targetField, targetVal.trim());
+                            if(changesToApply.size===0) return {changed:false, info:'No rules matched the current ticket.'};
+                            const changes = Array.from(changesToApply,([f,v])=>({field:f,value:v}));
+                            const originals = changes.map(c=>({field:c.field,value:g_form.getValue(c.field)}));
+                            return {changed:true, changes, originals};
+                        }\`;
                         
-                        return 'const cfg=' + JSON.stringify(finalConfig) + ';const findEnv=' + findEnvFn + ';const runLogic=' + logicFn + ';const isBatch=' + cfg.batchMode + ';' +
-                            "const TIMEOUT_MS=8000;const GFORM_POLL_INTERVAL=100;const GFORM_MAX_ATTEMPTS=50;const SAVE_DELAY_MS=1500;" +
-                            "const waitForGForm=(win)=>new Promise((resolve,reject)=>{let attempts=0;const check=()=>{if(win&&win.g_form&&typeof win.g_form.getValue==='function'){resolve(win.g_form)}else if(attempts++<GFORM_MAX_ATTEMPTS){setTimeout(check,GFORM_POLL_INTERVAL)}else{reject(new Error('g_form not available'))}};check()});" +
-                            "const processForm=(g_form_instance)=>{const result=runLogic(g_form_instance,cfg);if(result.changed){g_form_instance.setValue(result.targetField,result.newValue)}return result};" +
-                            "const env=findEnv(window.top);if(!env){alert('Could not detect ServiceNow interface. Ensure you are on a ServiceNow page and try again.');return}" +
-                            "if(!isBatch){if(env.type!=='form'){alert('This bookmarklet must be run on a ServiceNow form page. Please navigate to a form (like incident.do) and try again.');return}const result=processForm(env.context.g_form);if(!result.changed){alert(result.info)}}" +
-                            "else{if(env.type!=='list'){alert('Batch mode must be run on a ServiceNow list view. Please navigate to a list (like incident_list.do) and try again.');return}const{win:winCtx,listEl}=env.context;const tableName=listEl.getAttribute('glide_table')||'task';const allTicketIds=[...winCtx.document.querySelectorAll('input.list_checkbox:checked')].map(cb=>cb.closest('tr').getAttribute('sys_id')).filter(Boolean);if(!allTicketIds.length){alert('No tickets checked in list.');return}" +
-                            "const modalId='sn-modal-'+Date.now()+'-'+Math.random().toString(36).substr(2,9);const modalEl=document.createElement('div');modalEl.id=modalId;modalEl.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#0008;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;';modalEl.innerHTML='<div style=\"width:100%;max-width:800px;background:#fff;color:#000;border-radius:12px;box-shadow:0 8px 32px #0005;display:flex;flex-direction:column\"><h3 style=\"margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0\">Batch Processing</h3><div id=\"'+modalId+'-content\" style=\"padding:20px;overflow-y:auto;max-height:60vh;\"></div><div id=\"'+modalId+'-footer\" style=\"padding:20px;border-top:1px solid #ccc;display:flex;justify-content:space-between;align-items:center\"></div></div>';document.body.appendChild(modalEl);const modal={content:document.getElementById(modalId+'-content'),footer:document.getElementById(modalId+'-footer'),close:()=>{modalEl.remove()}};" +
-                            "const createManagedFrame=(url,reject)=>{const fr=document.createElement('iframe');fr.style.cssText='position:absolute;left:-9999px;width:1px;height:1px;';const clean=()=>{clearTimeout(t);fr.onload=fr.onerror=null;fr.remove()};const t=setTimeout(()=>reject(new Error('Timeout')),TIMEOUT_MS);document.body.appendChild(fr);fr.src=url;return{frame:fr,cleanup:clean}};" +
-                            "const getTicketDetails=sysId=>new Promise((resolve,reject)=>{const url='/'+tableName+'.do?sys_id='+sysId+'&sysparm_nostack=true';const{frame,cleanup}=createManagedFrame(url,reject);frame.onload=async()=>{try{const g_form=await waitForGForm(frame.contentWindow);const res=runLogic(g_form,cfg);resolve({sysId,...res})}catch(e){reject(e)}finally{cleanup()}};frame.onerror=()=>{cleanup();reject(new Error('Frame error'))}});" +
-                            "const updateTicket=(sysId,newValue)=>new Promise((resolve,reject)=>{const url='/'+tableName+'.do?sys_id='+sysId+'&sysparm_nostack=true';const{frame,cleanup}=createManagedFrame(url,reject);frame.onload=async()=>{try{const g_form=await waitForGForm(frame.contentWindow);g_form.setValue(cfg.targetField,newValue);g_form.save();setTimeout(()=>{cleanup();resolve({success:true})},SAVE_DELAY_MS)}catch(e){cleanup();reject(e)}};frame.onerror=()=>{cleanup();reject(new Error('Frame error'))}});" +
-                            "(async()=>{modal.content.innerHTML='<p>Analyzing tickets...</p>';const allDetails=await Promise.allSettled(allTicketIds.map(id=>getTicketDetails(id)));const failed=allDetails.filter(r=>r.status==='rejected');if(failed.length>0){console.warn('Failed to analyze '+failed.length+' tickets:',failed.map(f=>f.reason))}const toProcess=allDetails.filter(r=>r.status==='fulfilled'&&r.value&&r.value.changed).map(r=>r.value);if(!toProcess.length){modal.content.innerHTML='<p>Analysis complete. No tickets matched the rules for modification.</p>';modal.footer.innerHTML='<button onclick=\"document.getElementById(\\''+modalId+'\\').remove()\">Close</button>';return}modal.content.innerHTML='<h4>Ready to process '+toProcess.length+' tickets:</h4><div style=\"max-height:30vh;overflow-y:auto;border:1px solid #ccc;padding:5px;\">'+toProcess.map(t=>'<div><strong>'+t.originalValue+'</strong> → '+t.newValue+'</div>').join('')+'</div>';modal.footer.innerHTML='<button onclick=\"document.getElementById(\\''+modalId+'\\').remove()\">Cancel</button><button id=\"'+modalId+'-proc\">Process</button>';document.getElementById(modalId+'-proc').onclick=async()=>{modal.content.innerHTML='<p>Processing...</p><div id=\"'+modalId+'-res\"></div>';modal.footer.innerHTML='';let completed=0;for(const ticket of toProcess){try{await updateTicket(ticket.sysId,ticket.newValue);document.getElementById(modalId+'-res').innerHTML+='<div style=\"color:green\">✓ '+ticket.originalValue+'</div>'}catch(e){document.getElementById(modalId+'-res').innerHTML+='<div style=\"color:red\">✗ '+ticket.originalValue+': '+e.message+'</div>'}completed++;" +
-                            "modal.content.querySelector('p').textContent=\`Processing... (\${completed}/\${toProcess.length}) - \${Math.round((completed/toProcess.length)*100)}%\`}modal.footer.innerHTML='<button onclick=\"window.location.reload()\">Done (Reload)</button>'}})()}";
+                        return 'const cfg=' + JSON.stringify(finalConfig) + ';const findEnv=' + findEnvFn + ';const runLogic=' + logicFn + ';const isBatch=' + cfg.batchMode + ';const waitForGForm=' + waitForGFormFn + ';const parseDate=' + parseDateFn + ';' +
+                        \`(async () => {
+                            try {
+                                const env = findEnv(window.top);
+                                if (!env) throw new Error('Could not detect ServiceNow interface.');
+                                if (!isBatch) {
+                                    if (env.type !== 'form') throw new Error('This bookmarklet must be run on a ServiceNow form page.');
+                                    const g_form = await waitForGForm(env.context.win);
+                                    const result = await runLogic(g_form, cfg);
+                                    if (!result.changed) return await SN_UI.showInfo('Info', result.info);
+                                    result.changes.forEach(c => g_form.setValue(c.field, c.value));
+                                    return;
+                                }
+                                if (env.type !== 'list') throw new Error('Batch mode must be run on a ServiceNow list view.');
+                                const {win:winCtx, listEl} = env.context;
+                                const tableName = listEl.getAttribute('glide_table') || 'task';
+                                const allTicketIds = [...winCtx.document.querySelectorAll('input.list_checkbox:checked')].map(cb => cb.closest('tr').getAttribute('sys_id')).filter(Boolean);
+                                if (!allTicketIds.length) throw new Error('No tickets checked in the list.');
+                                
+                                const modalId='sn-batch-modal', TIMEOUT_MS=8000, SAVE_DELAY_MS=1500;
+                                document.body.insertAdjacentHTML('beforeend', \`<div id="\${modalId}" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#0008;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;"><div style="width:100%;max-width:800px;background:#fff;color:#000;border-radius:12px;display:flex;flex-direction:column;"><h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0">Batch Processing</h3><div id="\${modalId}-content" style="padding:20px;overflow-y:auto;max-height:60vh;"></div><div id="\${modalId}-footer" style="padding:20px;border-top:1px solid #ccc;display:flex;justify-content:space-between;align-items:center"></div></div></div>\`);
+                                const modal = { content: document.getElementById(modalId+'-content'), footer: document.getElementById(modalId+'-footer'), close: () => document.getElementById(modalId)?.remove() };
+                                
+                                const createManagedFrame = (url) => new Promise((resolve, reject) => {
+                                    const fr=document.createElement('iframe'); fr.style.cssText='position:absolute;left:-9999px;width:1px;height:1px;';
+                                    const clean = () => { clearTimeout(t); fr.onload=fr.onerror=null; fr.remove(); };
+                                    const t = setTimeout(() => { clean(); reject(new Error('Timeout')); }, TIMEOUT_MS);
+                                    fr.onload = () => { clearTimeout(t); resolve({frame: fr, cleanup: clean}); };
+                                    fr.onerror = () => { clean(); reject(new Error('Frame load error')); };
+                                    document.body.appendChild(fr); fr.src=url;
+                                });
+
+                                const getTicketDetails = async (sysId) => { const {frame, cleanup} = await createManagedFrame('/'+tableName+'.do?sys_id='+sysId+'&sysparm_nostack=true'); try { const g_form = await waitForGForm(frame.contentWindow); return {sysId, ...(await runLogic(g_form, cfg))}; } finally { cleanup(); } };
+                                const updateTicket = async (sysId, changes) => { const {frame, cleanup} = await createManagedFrame('/'+tableName+'.do?sys_id='+sysId+'&sysparm_nostack=true'); try { const g_form = await waitForGForm(frame.contentWindow); changes.forEach(c => g_form.setValue(c.field, c.value)); g_form.save(); await new Promise(r => setTimeout(r, SAVE_DELAY_MS)); } finally { cleanup(); } };
+                                
+                                modal.content.innerHTML='<p>Analyzing tickets...</p>';
+                                const allDetails = await Promise.allSettled(allTicketIds.map(id => getTicketDetails(id)));
+                                const toProcess = allDetails.filter(r => r.status === 'fulfilled' && r.value.changed).map(r => r.value);
+
+                                if (!toProcess.length) { modal.content.innerHTML = '<p>Analysis complete. No tickets matched the rules for modification.</p>'; modal.footer.innerHTML = '<button onclick="document.getElementById(\\'\${modalId}\\').remove()">Close</button>'; return; }
+                                
+                                const changeSummary = t => t.changes.map((c, i) => \`<div><small>(\${c.field})</small> <strong>\${t.originals[i].value}</strong> → <strong>\${c.value}</strong></div>\`).join('');
+                                modal.content.innerHTML = \`<h4>Ready to process \${toProcess.length} tickets:</h4><div style="max-height:30vh;overflow-y:auto;border:1px solid #ccc;padding:5px;">\${toProcess.map(t => '<div style="margin-bottom:5px;border-bottom:1px solid #eee;padding-bottom:5px;">'+changeSummary(t)+'</div>').join('')}</div>\`;
+                                modal.footer.innerHTML = '<button onclick="document.getElementById(\\'\${modalId}\\').remove()">Cancel</button><button id="\${modalId}-proc">Process</button>';
+                                
+                                document.getElementById(modalId+'-proc').onclick = async () => {
+                                    modal.content.innerHTML = '<p>Processing...</p><div id="\${modalId}-res" style="font-size:0.9em;max-height:40vh;overflow-y:auto"></div>'; modal.footer.innerHTML = ''; let completed=0;
+                                    for (const ticket of toProcess) {
+                                        try { await updateTicket(ticket.sysId, ticket.changes); document.getElementById(modalId+'-res').innerHTML += '<div style="color:green">✓ Ticket processed: ' + ticket.originals[0].value.substring(0,50) + '...</div>'; }
+                                        catch (e) { document.getElementById(modalId+'-res').innerHTML += '<div style="color:red">✗ Ticket failed: ' + e.message + '</div>'; }
+                                        completed++; modal.content.querySelector('p').textContent = \`Processing... (\${completed}/\${toProcess.length}) - \${Math.round((completed/toProcess.length)*100)}%\`;
+                                    }
+                                    modal.footer.innerHTML = '<button onclick="window.location.reload()">Done (Reload)</button>';
+                                };
+                            } catch(e) { await SN_UI.showInfo('Fatal Error', e.message); }
+                        })();\`;
                     },
-                    close() { this.win.document.getElementById(this.panelId).remove(); delete this.win.fieldModifier; }
+                    close() { this.win.document.getElementById(this.panelId)?.remove(); delete this.win.fieldModifier; }
                 };
                 builder.init();` +
             '})()';
@@ -325,6 +461,7 @@ const wizard = {
         this.cacheDOMElements();
         this.buildToolSelection();
         this.addEventListeners();
+        this.checkCDN();
     },
     cacheDOMElements() {
         this.elements = {
@@ -341,6 +478,15 @@ const wizard = {
     addEventListeners() {
         this.elements.generateBtn.addEventListener('click', () => this.generateBookmarklet());
         this.elements.backBtn.addEventListener('click', () => this.goBack());
+    },
+    checkCDN() {
+        // A simple check to see if a core tailwind class has an effect.
+        // The body has a bg-slate-100 class.
+        const bgColor = window.getComputedStyle(document.body).getPropertyValue('background-color');
+        // rgb(241 245 249) is slate-100. If it's something else, CSS likely failed.
+        if (!bgColor || !bgColor.startsWith('rgb(241')) {
+            document.getElementById('cdn-error-notice').style.display = 'block';
+        }
     },
     showStep(stepNumber) {
         this.elements.steps.forEach(s => s.classList.remove('active'));
@@ -368,8 +514,8 @@ const wizard = {
     getConfig() {
         const toolKey = this.state.activeToolKey;
         const configs = {
-            form_filler: () => ({ twoClick: document.getElementById('two_click')?.checked || false }),
-            field_modifier: () => ({ batchMode: document.getElementById('batch_mode')?.checked || false }),
+            ticket_template: () => ({ twoClick: document.getElementById('two_click')?.checked || false }),
+            ticket_automation: () => ({ batchMode: document.getElementById('batch_mode')?.checked || false }),
         };
         if (!configs[toolKey]) throw new Error("Invalid tool selected.");
         return configs[toolKey]();
@@ -382,17 +528,8 @@ const wizard = {
             const config = this.getConfig();
             const rawScript = tool.generateScript(config);
             
-            const minifyScript = (script) => script
-                .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
-                .replace(/\/\/.*$/gm, '')       // Remove line comments
-                .replace(/\s*([{}();,=])\s*/g, '$1') // Remove spaces around operators
-                .replace(/\s+/g, ' ')           // Collapse whitespace
-                .replace(/;\s*}/g, '}')          // Remove semicolons before closing braces
-                .trim();
+            this.state.finalCode = rawScript;
             
-            const minifiedScript = encodeURIComponent(minifyScript(rawScript));
-            
-            this.state.finalCode = `javascript:${minifiedScript}`;
             this.buildResultsPage(this.state.finalCode, name, tool.instructions);
             this.showStep(3);
         } catch (error) {
@@ -403,32 +540,32 @@ const wizard = {
         }
     },
     buildResultsPage(href, name, instructions) {
-       const container = this.elements.step3Container;
-       container.innerHTML = `
-           <h2 class="text-2xl font-semibold mb-4 text-center text-slate-700">Get Your Bookmarklet!</h2>
-           <div class="bg-slate-100 p-6 rounded-lg text-center">
-               <p class="font-medium text-slate-600">Drag the blue link to your browser's bookmarks bar.</p>
-               <div class="my-4 flex justify-center"><a id="bookmarklet-link" href="${href}" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700">${name}</a></div>
-               <div class="flex justify-center gap-2 mt-4">
-                   <button id="copyBtn" class="px-4 py-1.5 text-sm bg-slate-600 text-white rounded-md hover:bg-slate-700">Copy Code</button>
-               </div>
-           </div>
-           <div class="mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md">${instructions || 'Run the generated bookmarklet on the appropriate ServiceNow page.'}</div>
-           <div class="mt-6 text-center"><button id="startOverBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Create Another</button></div>`;
-       
-       const bookmarkletLink = container.querySelector('#bookmarklet-link');
-       const copyBtn = container.querySelector('#copyBtn');
-       const startOverBtn = container.querySelector('#startOverBtn');
+      const container = this.elements.step3Container;
+      container.innerHTML = `
+        <h2 class="text-2xl font-semibold mb-4 text-center text-slate-700">Get Your Bookmarklet!</h2>
+        <div class="bg-slate-100 p-6 rounded-lg text-center">
+            <p class="font-medium text-slate-600">Drag the blue link to your browser's bookmarks bar.</p>
+            <div class="my-4 flex justify-center"><a id="bookmarklet-link" href="${href}" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700">${name}</a></div>
+            <div class="flex justify-center gap-2 mt-4">
+                <button id="copyBtn" class="px-4 py-1.5 text-sm bg-slate-600 text-white rounded-md hover:bg-slate-700">Copy Code</button>
+            </div>
+        </div>
+        <div class="mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md">${instructions || 'Run the generated bookmarklet on the appropriate ServiceNow page.'}</div>
+        <div class="mt-6 text-center"><button id="startOverBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Create Another</button></div>`;
+      
+      const bookmarkletLink = container.querySelector('#bookmarklet-link');
+      const copyBtn = container.querySelector('#copyBtn');
+      const startOverBtn = container.querySelector('#startOverBtn');
 
-       bookmarkletLink.addEventListener('click', (e) => e.preventDefault());
-       copyBtn.addEventListener('click', () => this.copyCode());
-       startOverBtn.addEventListener('click', () => this.goBack());
+      bookmarkletLink.addEventListener('click', (e) => e.preventDefault());
+      copyBtn.addEventListener('click', () => this.copyCode());
+      startOverBtn.addEventListener('click', () => this.goBack());
     },
     goBack() {
         this.state = { activeToolKey: null, finalCode: null };
         this.showStep(1);
     },
-    async copyCode() {
+    copyCode() {
         if (!this.state.finalCode) return;
         try {
             const textArea = document.createElement("textarea"); textArea.value = this.state.finalCode; textArea.style.position = "fixed"; textArea.style.left = "-9999px"; document.body.appendChild(textArea); textArea.focus(); textArea.select(); document.execCommand('copy'); document.body.removeChild(textArea);
@@ -444,4 +581,5 @@ document.addEventListener('DOMContentLoaded', () => wizard.init());
 </script>
 </body>
 </html>
+
 
