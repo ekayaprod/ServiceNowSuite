@@ -8,32 +8,135 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999; }
+        .toast { background-color: #22c55e; color: white; padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); opacity: 0; transform: translateX(100%); animation: slideIn 0.5s forwards, fadeOut 0.5s 4.5s forwards; }
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateX(100%); } }
     </style>
 </head>
-<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+<body class="bg-slate-100">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="container w-full max-w-4xl mx-auto">
+            <header class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-slate-800">ServiceNow Bookmarklet Suite</h1>
+                <p class="text-slate-600 mt-2">Build powerful bookmarklets to streamline your ServiceNow workflow.</p>
+            </header>
 
-    <div class="container w-full max-w-3xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-slate-800">ServiceNow Bookmarklet Suite</h1>
-            <p class="text-slate-600 mt-2">Build powerful, context-aware bookmarklets for ServiceNow.</p>
-        </header>
+            <main id="app-container" class="bg-white p-8 rounded-2xl shadow-lg">
+                <div id="step1" class="step active">
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-6">Choose a Tool</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <button id="btn-template" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                            <h3 class="font-semibold text-lg text-slate-800">Ticket Template</h3>
+                            <p class="text-slate-500 mt-2 text-sm">Fill new tickets instantly</p>
+                        </button>
+                        <a href="ticket_automation.html" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 no-underline">
+                            <h3 class="font-semibold text-lg text-slate-800">Ticket Automation</h3>
+                            <p class="text-slate-500 mt-2 text-sm">Modify existing tickets</p>
+                        </a>
+                        <a href="data_extractor.html" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 no-underline">
+                            <h3 class="font-semibold text-lg text-slate-800">Data Extractor</h3>
+                            <p class="text-slate-500 mt-2 text-sm">Export data to CSV</p>
+                        </a>
+                    </div>
+                </div>
 
-        <main id="app-container" class="bg-white p-8 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-semibold text-slate-800 mb-6 text-center">Select a Tool Category</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <a href="form_tools.html" class="group block text-center p-8 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    <h3 class="font-semibold text-xl text-slate-800">Form Tools</h3>
-                    <p class="text-slate-500 mt-2">Build bookmarklets that run on ServiceNow forms, like incidents or change requests.</p>
-                    <p class="mt-3 text-sm font-semibold text-blue-600">Includes: Form Filler, Field Modifier</p>
-                </a>
-                <a href="list_tools.html" class="group block text-center p-8 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    <h3 class="font-semibold text-xl text-slate-800">List Tools</h3>
-                    <p class="text-slate-500 mt-2">Build bookmarklets that run on ServiceNow list views to perform reports or bulk actions.</p>
-                     <p class="mt-3 text-sm font-semibold text-blue-600">Includes: Report Builder, Deferred Updater</p>
-                </a>
-            </div>
-        </main>
+                <div id="step2" class="step">
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Configure: Ticket Template Builder</h2>
+                    <div class="space-y-6">
+                        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
+                            This creates a builder tool. Run it on a ServiceNow form, click fields to add them to your template, then generate the final bookmarklet.
+                        </div>
+                        <div>
+                            <h4 class="text-md font-semibold text-slate-800 mb-3">Options</h4>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="two_click" class="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-slate-600">Two-click mode (opens new record form first)</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label for="bookmarkletName" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
+                            <input type="text" id="bookmarkletName" value="Ticket Template" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                        </div>
+                    </div>
+                    <div class="mt-8 flex justify-between items-center">
+                        <button id="backBtn" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
+                        <button id="generateBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Builder</button>
+                    </div>
+                </div>
+
+                <div id="step3" class="step"></div>
+            </main>
+        </div>
     </div>
 
+<script>
+function showToast(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) {
+        const newContainer = document.createElement('div');
+        newContainer.id = 'toast-container';
+        newContainer.style.cssText = 'position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem;';
+        document.body.appendChild(newContainer);
+    }
+    const toast = document.createElement('div');
+    toast.style.cssText = 'display: flex; align-items: center; padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); background-color: #22c55e; color: white; opacity: 0; transform: translateX(100%); animation: slideIn 0.5s forwards, fadeOut 0.5s 4.5s forwards;';
+    toast.textContent = message;
+    (container || document.getElementById('toast-container')).appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+}
+
+const app = {
+    init() {
+        document.getElementById('btn-template').addEventListener('click', () => this.showStep(2));
+        document.getElementById('backBtn').addEventListener('click', () => this.showStep(1));
+        document.getElementById('generateBtn').addEventListener('click', () => this.generate());
+    },
+    showStep(n) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + n).classList.add('active');
+    },
+    generate() {
+        const twoClick = document.getElementById('two_click').checked;
+        const name = document.getElementById('bookmarkletName').value.trim() || 'Ticket Template';
+        
+        const findEnvFn = `function(w){try{function findFS(n){let f=n.querySelector('#gsft_main,iframe[name="gsft_main"]');if(f)return f;const a=n.querySelectorAll('*');for(const e of a)if(e.shadowRoot&&(f=findFS(e.shadowRoot)))return f;return null}function getE(t){if(!t)return null;if(t.g_form&&typeof t.g_form.getTableName==='function')return{type:'form',ctx:{w:t,g:t.g_form}};return null}const fe=findFS(w.document);if(fe&&fe.contentWindow){const fv=getE(fe.contentWindow);if(fv)return fv}return getE(w)}catch(e){console.error('Err:',e)}return null}`;
+        const waitForGFormFn = `(w)=>new Promise((r,e)=>{let t=0;const n=()=>{w&&w.g_form&&typeof w.g_form.getValue==='function'?r(w.g_form):t++<50?setTimeout(n,100):e(new Error('g_form NA'))};n()})`;
+        
+        const builderCode = `javascript:(async function(){const findEnv=${findEnvFn};const waitForGForm=${waitForGFormFn};const cfg=${JSON.stringify({twoClick})};const b={fields:[],pId:'sftb-'+Date.now(),async init(){const env=findEnv(window.top);if(!env||env.type!=='form')return alert('Run builder on a form page.');if(env.ctx.win.document.getElementById(this.pId))return;this.g=env.ctx.g;this.w=env.ctx.win;this.bUI();this.w.document.addEventListener('click',this.cH.bind(this),!0);this.w.formBuilder=this},bUI(){const h=\`<div id="\${this.pId}" style="position:fixed;top:5%;left:50%;transform:translateX(-50%);width:90%;max-width:600px;background:#fff;color:#000;border-radius:12px;box-shadow:0 8px 32px #0005;z-index:999999;font-family:sans-serif;display:flex;flex-direction:column;max-height:90vh"><h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0">Template Builder</h3><div style="padding:20px;overflow-y:auto"><p style="margin:0 0 15px">Click form fields to add them.</p><div id="\${this.pId}-list"></div><div id="\${this.pId}-res" style="display:none;margin-top:20px;text-align:center"></div></div><div style="padding:20px;border-top:1px solid #ccc;display:flex;justify-content:flex-end;gap:10px"><button id="\${this.pId}-close">Close</button><button id="\${this.pId}-gen" style="background:#0066cc;color:white;padding:8px 16px;border:none;border-radius:6px">Generate</button></div></div>\`;this.w.document.body.insertAdjacentHTML('beforeend',h);this.uUI();this.w.document.getElementById(this.pId).addEventListener('click',this.hE.bind(this));this.w.document.getElementById(this.pId).addEventListener('change',this.hE.bind(this));this.w.document.getElementById(this.pId+'-gen').onclick=()=>this.genF();this.w.document.getElementById(this.pId+'-close').onclick=()=>this.close()},uUI(){const lE=this.w.document.getElementById(this.pId+'-list');if(!lE)return;lE.innerHTML=this.fields.length?this.fields.map((f,i)=>'<div style="display:flex;align-items:center;padding:8px;border-bottom:1px solid #eee"><div style="flex:1;font-size:.9em"><b>'+f.l+'</b> ('+f.n+')</div><input value="'+(f.v||'').replace(/"/g,'&quot;')+'" data-i="'+i+'" data-k="v" style="flex:2;padding:6px;border:1px solid #ccc;margin:0 8px;border-radius:4px"><button data-i="'+i+'" data-a="rm" style="padding:4px 8px;background:#dc3545;color:white;border:none;border-radius:4px">X</button></div>').join(''):'<div style="padding:20px;text-align:center;color:#6c757d;">Click fields to add</div>'},cH(e){try{if(e.target.closest('#'+this.pId))return;const el=e.target.closest('div.form-group,tr[data-form-type]');if(!el)return;e.preventDefault();e.stopPropagation();let inp=el.querySelector('select,input:not([type=hidden]),textarea');if(!inp){const rF=el.querySelector('[data-ref-id],[data-reference]');if(rF)inp=rF}if(!inp)return;const oN=inp.name||inp.id,cN=oN.replace(/^sys_display\\\\./,'').replace(/^[a-z_]+\\\\./,'');if(!cN||!this.g.hasField(cN)||this.fields.find(f=>f.n===cN))return;let dV=null,dDV=null;if(inp.tagName==='SELECT'){dV=inp.value;dDV=inp.selectedOptions[0]?.textContent.trim()}else{dV=inp.value}const fV=this.g.getValue(cN)||dV||'',fDV=this.g.getDisplayValue(cN);this.fields.push({n:cN,l:this.g.getLabelOf(cN)||cN,v:fV,dV:(fDV&&fDV!==fV)?fDV:null});this.uUI()}catch(err){}},hE(e){const t=e.target,i=t.dataset.i,a=t.dataset.a;if(!i||!a)return;if(a==='rm'){this.fields.splice(i,1);this.uUI()}else{this.fields[i][a]=t.value}},async genF(){if(!this.fields.length)return alert('Add at least one field.');const name=prompt('Bookmarklet name:','New Template');if(!name)return;const tbl=this.g.getTableName();let logic='const f='+JSON.stringify(this.fields)+';';if(cfg.twoClick){logic+="const tU='/'+'"+tbl+"'+'.do?sys_id=-1';if(!window.location.href.includes(tU.split('?')[0])){window.open(tU,'_blank');return;}"}logic+="(async()=>{try{const g=await waitForGForm(findEnv(window.top).ctx.win);const deps=['assignment_group','u_owner_group','caller_id'];const sF=f=>{try{if(g.hasField(f.n))g.setValue(f.n,f.v,f.dV||undefined)}catch(e){console.warn('Skipping field:'+f.n,e.message)}};f.forEach(f=>{if(!deps.includes(f.n))sF(f)});setTimeout(()=>{f.forEach(f=>{if(deps.includes(f.n))sF(f)})},1500)}catch(e){alert('Error: '+e.message)}})();";const finalCode=\`javascript:(async function(){const findEnv=\${findEnvFn};const waitForGForm=\${waitForGFormFn};\${logic}})()\`;const link=this.w.document.createElement('a');link.href=finalCode;link.textContent=name;link.style.cssText='display:inline-block;padding:12px 24px;background:#28a745;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;margin:10px 0';const resDiv=this.w.document.getElementById(this.pId+'-res');resDiv.innerHTML='<p><strong>Success!</strong> Drag to bookmarks:</p>';resDiv.appendChild(link);resDiv.style.display='block'},close(){this.w.document.removeEventListener('click',this.cH,!0);this.w.document.getElementById(this.pId)?.remove();delete this.w.formBuilder}};b.init()})()`;
+        
+        this.showResult(builderCode, name);
+    },
+    showResult(code, name) {
+        const container = document.getElementById('step3');
+        container.innerHTML = `
+            <h2 class="text-2xl font-semibold mb-4 text-center text-slate-700">Your Builder Bookmarklet</h2>
+            <div class="bg-slate-100 p-6 rounded-lg text-center">
+                <p class="font-medium text-slate-600">Drag this link to your bookmarks bar:</p>
+                <div class="my-4 flex justify-center">
+                    <a id="bookmarklet-link" href="#" onclick="event.preventDefault()" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700">${name}</a>
+                </div>
+            </div>
+            <div class="mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md">
+                Run this builder on a ServiceNow form. Click fields to add them, then generate your final template bookmarklet.
+            </div>
+            <div class="mt-6 text-center">
+                <button id="startOverBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-600 hover:bg-slate-700">Create Another</button>
+            </div>`;
+        
+        const link = document.getElementById('bookmarklet-link');
+        link.href = code;
+        
+        document.getElementById('startOverBtn').addEventListener('click', () => this.showStep(1));
+        this.showStep(3);
+    }
+};
+
+app.init();
+</script>
 </body>
 </html>
+
