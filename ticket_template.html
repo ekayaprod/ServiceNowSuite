@@ -26,25 +26,35 @@
             </header>
 
             <main id="app-container" class="bg-white p-8 rounded-2xl shadow-lg">
+                <!-- Step 1: Tool Selection -->
                 <div id="step1" class="step active">
                     <h2 class="text-2xl font-semibold text-slate-800 mb-6">Choose a Tool</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Card 1: Ticket Template (Inline) -->
                         <button id="btn-template" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
                             <h3 class="font-semibold text-lg text-slate-800">Ticket Template</h3>
                             <p class="text-slate-500 mt-2 text-sm">Fill new tickets instantly</p>
                         </button>
+                        <!-- Card 2: Deferred Updater (Inline) -->
+                        <button id="btn-updater" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                            <h3 class="font-semibold text-lg text-slate-800">Deferred Bulk Updater</h3>
+                            <p class="text-slate-500 mt-2 text-sm">Schedule bulk comments</p>
+                        </button>
+                        <!-- Card 3: Universal Automation (Link) -->
                         <a href="ticket_automation.html" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 no-underline">
-                            <h3 class="font-semibold text-lg text-slate-800">Ticket Automation</h3>
-                            <p class="text-slate-500 mt-2 text-sm">Modify existing tickets</p>
+                            <h3 class="font-semibold text-lg text-slate-800">Universal Automation</h3>
+                            <p class="text-slate-500 mt-2 text-sm">Complex, rule-based logic</p>
                         </a>
+                        <!-- Card 4: Data Extractor (Link) -->
                         <a href="data_extractor.html" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 no-underline">
-                            <h3 class="font-semibold text-lg text-slate-800">Data Extractor</h3>
-                            <p class="text-slate-500 mt-2 text-sm">Export data to CSV</p>
+                            <h3 class="font-semibold text-lg text-slate-800">CSV Data Extractor</h3>
+                            <p class="text-slate-500 mt-2 text-sm">Export list data to CSV</p>
                         </a>
                     </div>
                 </div>
 
-                <div id="step2" class="step">
+                <!-- Step 2a: Configure Ticket Template -->
+                <div id="step2-template" class="step">
                     <h2 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Configure: Ticket Template Builder</h2>
                     <div class="space-y-6">
                         <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
@@ -58,17 +68,43 @@
                             </label>
                         </div>
                         <div>
-                            <label for="bookmarkletName" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
-                            <input type="text" id="bookmarkletName" value="Ticket Template" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                            <label for="bookmarkletName-template" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
+                            <input type="text" id="bookmarkletName-template" value="Ticket Template" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
                         </div>
                     </div>
                     <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
-                        <button id="generateBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Builder</button>
+                        <button id="backBtn-template" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
+                        <button id="generateBtn-template" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Builder</button>
                     </div>
                 </div>
 
-                <div id="step3" class="step"></div>
+                <!-- Step 2b: Configure Deferred Updater -->
+                <div id="step2-updater" class="step">
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Configure: Deferred Bulk Updater</h2>
+                    <div class="space-y-6">
+                        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
+                            This tool creates a bookmarklet for scheduling bulk updates from a list view. Run it on a list, select tickets, and schedule your comment.
+                        </div>
+                        <div>
+                            <label for="commentField" class="block text-sm font-medium text-slate-700">Target Comment Field</label>
+                            <select id="commentField" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                                <option value="work_notes" selected>Work Notes (Internal)</option>
+                                <option value="comments">Additional Comments (Customer Visible)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="bookmarkletName-updater" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
+                            <input type="text" id="bookmarkletName-updater" value="Deferred Updater" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                        </div>
+                    </div>
+                    <div class="mt-8 flex justify-between items-center">
+                        <button id="backBtn-updater" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
+                        <button id="generateBtn-updater" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Tool</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Result Page (Generic) -->
+                <div id="step3-result" class="step"></div>
             </main>
         </div>
     </div>
@@ -91,29 +127,199 @@ function showToast(message) {
 
 const app = {
     init() {
-        document.getElementById('btn-template').addEventListener('click', () => this.showStep(2));
-        document.getElementById('backBtn').addEventListener('click', () => this.showStep(1));
-        document.getElementById('generateBtn').addEventListener('click', () => this.generate());
+        // Tool selection
+        document.getElementById('btn-template').addEventListener('click', () => this.showStep('2-template'));
+        document.getElementById('btn-updater').addEventListener('click', () => this.showStep('2-updater'));
+        
+        // Template config
+        document.getElementById('backBtn-template').addEventListener('click', () => this.showStep(1));
+        document.getElementById('generateBtn-template').addEventListener('click', () => this.generateTemplate());
+
+        // Updater config
+        document.getElementById('backBtn-updater').addEventListener('click', () => this.showStep(1));
+        document.getElementById('generateBtn-updater').addEventListener('click', () => this.generateUpdater());
     },
+    
     showStep(n) {
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
         document.getElementById('step' + n).classList.add('active');
     },
-    generate() {
+
+    // Generator: Ticket Template
+    generateTemplate() {
         const twoClick = document.getElementById('two_click').checked;
-        const name = document.getElementById('bookmarkletName').value.trim() || 'Ticket Template';
+        const name = document.getElementById('bookmarkletName-template').value.trim() || 'Ticket Template';
         
         const findEnvFn = `function(w){try{function findFS(n){let f=n.querySelector('#gsft_main,iframe[name="gsft_main"]');if(f)return f;const a=n.querySelectorAll('*');for(const e of a)if(e.shadowRoot&&(f=findFS(e.shadowRoot)))return f;return null}function getE(t){if(!t)return null;if(t.g_form&&typeof t.g_form.getTableName==='function')return{type:'form',ctx:{w:t,g:t.g_form}};return null}const fe=findFS(w.document);if(fe&&fe.contentWindow){const fv=getE(fe.contentWindow);if(fv)return fv}return getE(w)}catch(e){console.error('Err:',e)}return null}`;
         const waitForGFormFn = `(w)=>new Promise((r,e)=>{let t=0;const n=()=>{w&&w.g_form&&typeof w.g_form.getValue==='function'?r(w.g_form):t++<50?setTimeout(n,100):e(new Error('g_form NA'))};n()})`;
         
         const builderCode = `javascript:(async function(){const findEnv=${findEnvFn};const waitForGForm=${waitForGFormFn};const cfg=${JSON.stringify({twoClick})};const b={fields:[],pId:'sftb-'+Date.now(),async init(){const env=findEnv(window.top);if(!env||env.type!=='form')return alert('Run builder on a form page.');if(env.ctx.win.document.getElementById(this.pId))return;this.g=env.ctx.g;this.w=env.ctx.win;this.bUI();this.w.document.addEventListener('click',this.cH.bind(this),!0);this.w.formBuilder=this},bUI(){const h=\`<div id="\${this.pId}" style="position:fixed;top:5%;left:50%;transform:translateX(-50%);width:90%;max-width:600px;background:#fff;color:#000;border-radius:12px;box-shadow:0 8px 32px #0005;z-index:999999;font-family:sans-serif;display:flex;flex-direction:column;max-height:90vh"><h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0">Template Builder</h3><div style="padding:20px;overflow-y:auto"><p style="margin:0 0 15px">Click form fields to add them.</p><div id="\${this.pId}-list"></div><div id="\${this.pId}-res" style="display:none;margin-top:20px;text-align:center"></div></div><div style="padding:20px;border-top:1px solid #ccc;display:flex;justify-content:flex-end;gap:10px"><button id="\${this.pId}-close">Close</button><button id="\${this.pId}-gen" style="background:#0066cc;color:white;padding:8px 16px;border:none;border-radius:6px">Generate</button></div></div>\`;this.w.document.body.insertAdjacentHTML('beforeend',h);this.uUI();this.w.document.getElementById(this.pId).addEventListener('click',this.hE.bind(this));this.w.document.getElementById(this.pId).addEventListener('change',this.hE.bind(this));this.w.document.getElementById(this.pId+'-gen').onclick=()=>this.genF();this.w.document.getElementById(this.pId+'-close').onclick=()=>this.close()},uUI(){const lE=this.w.document.getElementById(this.pId+'-list');if(!lE)return;lE.innerHTML=this.fields.length?this.fields.map((f,i)=>'<div style="display:flex;align-items:center;padding:8px;border-bottom:1px solid #eee"><div style="flex:1;font-size:.9em"><b>'+f.l+'</b> ('+f.n+')</div><input value="'+(f.v||'').replace(/"/g,'&quot;')+'" data-i="'+i+'" data-k="v" style="flex:2;padding:6px;border:1px solid #ccc;margin:0 8px;border-radius:4px"><button data-i="'+i+'" data-a="rm" style="padding:4px 8px;background:#dc3545;color:white;border:none;border-radius:4px">X</button></div>').join(''):'<div style="padding:20px;text-align:center;color:#6c757d;">Click fields to add</div>'},cH(e){try{if(e.target.closest('#'+this.pId))return;const el=e.target.closest('div.form-group,tr[data-form-type]');if(!el)return;e.preventDefault();e.stopPropagation();let inp=el.querySelector('select,input:not([type=hidden]),textarea');if(!inp){const rF=el.querySelector('[data-ref-id],[data-reference]');if(rF)inp=rF}if(!inp)return;const oN=inp.name||inp.id,cN=oN.replace(/^sys_display\\\\./,'').replace(/^[a-z_]+\\\\./,'');if(!cN||!this.g.hasField(cN)||this.fields.find(f=>f.n===cN))return;let dV=null,dDV=null;if(inp.tagName==='SELECT'){dV=inp.value;dDV=inp.selectedOptions[0]?.textContent.trim()}else{dV=inp.value}const fV=this.g.getValue(cN)||dV||'',fDV=this.g.getDisplayValue(cN);this.fields.push({n:cN,l:this.g.getLabelOf(cN)||cN,v:fV,dV:(fDV&&fDV!==fV)?fDV:null});this.uUI()}catch(err){}},hE(e){const t=e.target,i=t.dataset.i,a=t.dataset.a;if(!i||!a)return;if(a==='rm'){this.fields.splice(i,1);this.uUI()}else{this.fields[i][a]=t.value}},async genF(){if(!this.fields.length)return alert('Add at least one field.');const name=prompt('Bookmarklet name:','New Template');if(!name)return;const tbl=this.g.getTableName();let logic='const f='+JSON.stringify(this.fields)+';';if(cfg.twoClick){logic+="const tU='/'+'"+tbl+"'+'.do?sys_id=-1';if(!window.location.href.includes(tU.split('?')[0])){window.open(tU,'_blank');return;}"}logic+="(async()=>{try{const g=await waitForGForm(findEnv(window.top).ctx.win);const deps=['assignment_group','u_owner_group','caller_id'];const sF=f=>{try{if(g.hasField(f.n))g.setValue(f.n,f.v,f.dV||undefined)}catch(e){console.warn('Skipping field:'+f.n,e.message)}};f.forEach(f=>{if(!deps.includes(f.n))sF(f)});setTimeout(()=>{f.forEach(f=>{if(deps.includes(f.n))sF(f)})},1500)}catch(e){alert('Error: '+e.message)}})();";const finalCode=\`javascript:(async function(){const findEnv=\${findEnvFn};const waitForGForm=\${waitForGFormFn};\${logic}})()\`;const link=this.w.document.createElement('a');link.href=finalCode;link.textContent=name;link.style.cssText='display:inline-block;padding:12px 24px;background:#28a745;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;margin:10px 0';const resDiv=this.w.document.getElementById(this.pId+'-res');resDiv.innerHTML='<p><strong>Success!</strong> Drag to bookmarks:</p>';resDiv.appendChild(link);resDiv.style.display='block'},close(){this.w.document.removeEventListener('click',this.cH,!0);this.w.document.getElementById(this.pId)?.remove();delete this.w.formBuilder}};b.init()})()`;
         
-        this.showResult(builderCode, name);
+        const instructions = "Run this builder on a ServiceNow form. Click fields to add them, then generate your final template bookmarklet.";
+        this.showResult(builderCode, name, "Your Builder Bookmarklet", instructions);
     },
-    showResult(code, name) {
-        const container = document.getElementById('step3');
+
+    // Generator: Deferred Updater
+    generateUpdater() {
+        const cfg = { commentField: document.getElementById('commentField').value };
+        const name = document.getElementById('bookmarkletName-updater').value.trim() || 'Deferred Updater';
+
+        const findEnvFn = `function(w){try{function e(t){let n=t.querySelector("#gsft_main,iframe[name=gsft_main]");if(n)return n;const o=t.querySelectorAll("*");for(const r of o)if(r.shadowRoot&&(n=e(r.shadowRoot)))return n;return null}function t(n){return n?n.g_form&&"function"==typeof n.g_form.getTableName?{type:"form",context:{win:n,g_form:n.g_form}}:n.document.querySelector("#task_table,.list_table,[data-list_id]")?{type:"list",context:{win:n,listEl:n.document.querySelector("#task_table,.list_table,[data-list_id]")}}:null:null}const n=e(w.document);if(n&&n.contentWindow){try{const o=t(n.contentWindow);if(o)return o}catch(o){console.debug("Cross-origin frame access blocked (expected):",o.message)}}return t(w)}catch(o){return console.error("Error finding ServiceNow environment:",o),null}}`;
+        
+        // Generate final tool script
+        const updaterCode = `(function(){
+                const cfg = ${JSON.stringify(cfg)};
+                const findEnv = ${findEnvFn};
+                const env = findEnv(window.top);
+
+                if (!env || env.type !== 'list') {
+                    alert('This tool must be run on a ServiceNow list view. Please navigate to a list (like incident_list.do) and try again.');
+                    return;
+                }
+
+                const { win: winCtx, listEl } = env.context;
+                const tableName = listEl.getAttribute('glide_table') || 'task';
+                const modalId = 'sdbu-' + Date.now() + '-' + performance.now().toString(36).replace('.', '') + '-' + Math.random().toString(36).substr(2, 9);
+                
+                if (document.getElementById(modalId)) return;
+
+                const tickets = Array.from(listEl.querySelectorAll('tbody > tr[sys_id]')).map(row => {
+                    const sysId = row.getAttribute('sys_id');
+                    const numberEl = row.querySelector('td[glide_field="number"] a');
+                    const shortDescEl = row.querySelector('td[glide_field="short_description"]');
+                    if (!sysId || !numberEl) return null;
+                    const isChecked = row.querySelector('input.list_checkbox[type="checkbox"]')?.checked || false;
+                    return {
+                        sysId: sysId,
+                        number: numberEl.textContent.trim(),
+                        shortDesc: shortDescEl ? shortDescEl.textContent.trim() : '',
+                        checked: isChecked
+                    };
+                }).filter(Boolean);
+                
+                const checkedTickets = tickets.filter(t => t.checked);
+                const targetTickets = checkedTickets.length > 0 ? checkedTickets : tickets;
+
+                if (targetTickets.length === 0) {
+                    alert('No tickets found in the current list view.');
+                    return;
+                }
+                
+                const modalHTML = \`
+                    <div id="\${modalId}" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;">
+                        <div style="width:90%;max-width:800px;background:#fff;color:#000;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);display:flex;flex-direction:column;max-height:90vh;">
+                            <h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0;">Deferred Bulk Updater</h3>
+                            <div style="padding:20px;overflow-y:auto;flex-grow:1;">
+                                <div style="font-size: 0.9em; margin-bottom: 15px;">
+                                    \${checkedTickets.length > 0 ? \`Updating <strong>\${checkedTickets.length}</strong> checked ticket(s).\` : \`No tickets were checked. Updating <strong>all \${tickets.length}</strong> tickets in list.\`}
+                                </div>
+                                <div id="\${modalId}-ticket-list" style="max-height:30vh;overflow-y:auto;border:1px solid #ccc;padding:10px;border-radius:6px;">
+                                    \${targetTickets.map(t => \`
+                                        <label style="display:flex;align-items:center;padding:8px;border-bottom:1px solid #eee;cursor:pointer;">
+                                            <input type="checkbox" value="\${t.sysId}" class="\${modalId}-ticket-cb" style="margin-right:12px;" checked>
+                                            <div>
+                                                <strong>\${t.number}</strong><br>
+                                                <span style="font-size:0.9em;opacity:0.8;">\${t.shortDesc}</span>
+                                            </div>
+                                        </label>
+                                    \`).join('')}
+                                </div>
+                                <div style="margin-top:20px;">
+                                    <label for="\${modalId}-comment" style="display:block;font-weight:bold;margin-bottom:5px;">Comment to Add:</label>
+                                    <textarea id="\${modalId}-comment" style="width:100%;height:100px;padding:8px;border:1px solid #ccc;border-radius:6px;box-sizing: border-box;"></textarea>
+                                </div>
+                                <div style="margin-top:20px;">
+                                    <label for="\${modalId}-delay" style="display:block;font-weight:bold;margin-bottom:5px;">Delay (in minutes):</label>
+                                    <input type="number" id="\${modalId}-delay" value="5" min="1" style="width:100px;padding:8px;border:1px solid #ccc;border-radius:6px;box-sizing: border-box;">
+                                </div>
+                            </div>
+                            <div id="\${modalId}-footer" style="padding:20px;border-top:1px solid #ccc;display:flex;justify-content:flex-end;gap:10px;">
+                                <button id="\${modalId}-cancel" style="padding:8px 16px;">Cancel</button>
+                                <button id="\${modalId}-schedule" style="padding:8px 16px;background:#0066cc;color:#fff;border:none;border-radius:4px;">Schedule Update</button>
+                            </div>
+                        </div>
+                    </div>
+                \`;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                const closeModal = () => document.getElementById(modalId)?.remove();
+
+                document.getElementById(modalId + '-cancel').onclick = closeModal;
+                document.getElementById(modalId + '-schedule').onclick = () => {
+                    const selectedIds = Array.from(document.querySelectorAll('.\${modalId}-ticket-cb:checked')).map(cb => cb.value);
+                    const comment = document.getElementById(modalId + '-comment').value.trim();
+                    const delayMinutes = parseInt(document.getElementById(modalId + '-delay').value, 10);
+
+                    if (selectedIds.length === 0) { alert('Please select at least one ticket.'); return; }
+                    if (!comment) { alert('Please enter a comment.'); return; }
+                    if (isNaN(delayMinutes) || delayMinutes < 1) { alert('Please enter a valid delay in minutes (1 or more).'); return; }
+
+                    const delayMs = delayMinutes * 60 * 1000;
+                    
+                    alert(\`Update for \${selectedIds.length} tickets has been scheduled to run in \${delayMinutes} minutes. You can close this tab, but not the browser window.\`);
+                    closeModal();
+
+                    setTimeout(() => {
+                        (async () => {
+                            console.log(\`Starting deferred update for \${selectedIds.length} tickets...\`);
+                            const GFORM_POLL_INTERVAL = 100, GFORM_MAX_ATTEMPTS = 50, SAVE_DELAY_MS = 1500;
+                            const waitForGForm = (win) => new Promise((resolve, reject) => { let attempts = 0; const check = () => { if (win && win.g_form && typeof win.g_form.getValue === 'function') { resolve(win.g_form); } else if (attempts++ < GFORM_MAX_ATTEMPTS) { setTimeout(check, GFORM_POLL_INTERVAL); } else { reject(new Error('g_form not available')); } }; check(); });
+                            
+                            for (const sysId of selectedIds) {
+                                try {
+                                    const url = '/' + tableName + '.do?sys_id=' + sysId + '&sysparm_nostack=true';
+                                    const frame = document.createElement('iframe');
+                                    frame.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;';
+                                    document.body.appendChild(frame);
+                                    
+                                    await new Promise((resolve, reject) => {
+                                        let frameLoaded = false;
+                                        const frameTimeout = setTimeout(() => {
+                                            if (!frameLoaded) {
+                                                frame.remove(); 
+                                                reject(new Error('Frame load timeout'));
+                                            }
+                                        }, 8000); 
+
+                                        frame.onload = async () => {
+                                            frameLoaded = true;
+                                            clearTimeout(frameTimeout);
+                                            try {
+                                                const g_form = await waitForGForm(frame.contentWindow);
+                                                g_form.setValue(cfg.commentField, comment);
+                                                g_form.save();
+                                                console.log(\`Successfully updated ticket with sys_id: \${sysId}\`);
+                                                setTimeout(() => { frame.remove(); resolve(); }, SAVE_DELAY_MS);
+                                            } catch(e) { frame.remove(); reject(e); }
+                                        };
+                                        frame.onerror = () => { 
+                                            frameLoaded = true;
+                                            clearTimeout(frameTimeout);
+                                            frame.remove(); 
+                                            reject(new Error('Frame load error')); 
+                                        };
+                                        frame.src = url;
+                                    });
+                                } catch (e) {
+                                    console.error(\`Failed to update ticket with sys_id: \${sysId}\`, e);
+                                }
+                            }
+                            alert('Deferred bulk update process has completed.');
+                        })();
+                    }, delayMs);
+                };
+            })();`;
+
+        const finalCode = "javascript:" + updaterCode;
+        const instructions = "Run this tool on a ServiceNow list view. A panel will appear allowing you to select tickets (or all tickets, if none are checked) and schedule a bulk comment update.";
+        this.showResult(finalCode, name, "Your Tool Bookmarklet", instructions);
+    },
+
+    // Render result page
+    showResult(code, name, title, instructions) {
+        const container = document.getElementById('step3-result');
         container.innerHTML = `
-            <h2 class="text-2xl font-semibold mb-4 text-center text-slate-700">Your Builder Bookmarklet</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-center text-slate-700">${title}</h2>
             <div class="bg-slate-100 p-6 rounded-lg text-center">
                 <p class="font-medium text-slate-600">Drag this link to your bookmarks bar:</p>
                 <div class="my-4 flex justify-center">
@@ -121,7 +327,7 @@ const app = {
                 </div>
             </div>
             <div class="mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md">
-                Run this builder on a ServiceNow form. Click fields to add them, then generate your final template bookmarklet.
+                ${instructions}
             </div>
             <div class="mt-6 text-center">
                 <button id="startOverBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-600 hover:bg-slate-700">Create Another</button>
@@ -131,7 +337,7 @@ const app = {
         link.href = code;
         
         document.getElementById('startOverBtn').addEventListener('click', () => this.showStep(1));
-        this.showStep(3);
+        this.showStep('3-result');
     }
 };
 
