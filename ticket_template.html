@@ -150,6 +150,15 @@ const app = {
         const twoClick = document.getElementById('two_click').checked;
         const name = document.getElementById('bookmarkletName-template').value.trim() || 'Ticket Template';
         
+        /**
+         * Environment Detection Function (Form Only)
+         *
+         * Locates the ServiceNow form environment ('g_form') within the window hierarchy,
+         * searching through shadow DOMs and the main content iframe ('gsft_main').
+         *
+         * @param {Window} w - The window object to start searching from (usually window.top).
+         * @returns {{type: 'form', ctx: {w: Window, g: Object}} | null} The form context or null.
+         */
         const findEnvFn = `function(w){try{function findFS(n){let f=n.querySelector('#gsft_main,iframe[name="gsft_main"]');if(f)return f;const a=n.querySelectorAll('*');for(const e of a)if(e.shadowRoot&&(f=findFS(e.shadowRoot)))return f;return null}function getE(t){if(!t)return null;if(t.g_form&&typeof t.g_form.getTableName==='function')return{type:'form',ctx:{w:t,g:t.g_form}};return null}const fe=findFS(w.document);if(fe&&fe.contentWindow){const fv=getE(fe.contentWindow);if(fv)return fv}return getE(w)}catch(e){console.error('Err:',e)}return null}`;
         const waitForGFormFn = `(w)=>new Promise((r,e)=>{let t=0;const n=()=>{w&&w.g_form&&typeof w.g_form.getValue==='function'?r(w.g_form):t++<50?setTimeout(n,100):e(new Error('g_form NA'))};n()})`;
         
@@ -164,6 +173,15 @@ const app = {
         const cfg = { commentField: document.getElementById('commentField').value };
         const name = document.getElementById('bookmarkletName-updater').value.trim() || 'Deferred Updater';
 
+        /**
+         * Environment Detection Function (Form & List)
+         *
+         * Locates the ServiceNow environment (form or list) within the window hierarchy.
+         * Handles shadow DOM traversal and cross-origin iframe restrictions.
+         *
+         * @param {Window} w - The window object to start searching from.
+         * @returns {{type: 'form'|'list', context: {win: Window, g_form?: Object, listEl?: Element}} | null}
+         */
         const findEnvFn = `function(w){try{function e(t){let n=t.querySelector("#gsft_main,iframe[name=gsft_main]");if(n)return n;const o=t.querySelectorAll("*");for(const r of o)if(r.shadowRoot&&(n=e(r.shadowRoot)))return n;return null}function t(n){return n?n.g_form&&"function"==typeof n.g_form.getTableName?{type:"form",context:{win:n,g_form:n.g_form}}:n.document.querySelector("#task_table,.list_table,[data-list_id]")?{type:"list",context:{win:n,listEl:n.document.querySelector("#task_table,.list_table,[data-list_id]")}}:null:null}const n=e(w.document);if(n&&n.contentWindow){try{const o=t(n.contentWindow);if(o)return o}catch(o){console.debug("Cross-origin frame access blocked (expected):",o.message)}}return t(w)}catch(o){return console.error("Error finding ServiceNow environment:",o),null}}`;
         
         // Generate final tool script
