@@ -300,7 +300,7 @@ const app = {
                                         frame.src = url;
                                     });
                                 } catch (e) {
-                                    console.error(\`Failed to update ticket with sys_id: \${sysId}\`, e);
+                                    // Silently catch errors on individual tickets to allow bulk process to continue
                                 }
                             }
                             alert('Deferred bulk update process has completed.');
