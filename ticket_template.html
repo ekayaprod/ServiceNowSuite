@@ -123,7 +123,9 @@ const app = {
     
     showStep(n) {
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        document.getElementById('step' + n).classList.add('active');
+        const stepId = (typeof n === 'number' || !n.startsWith('step')) ? 'step' + n : n;
+        const el = document.getElementById(stepId);
+        if (el) el.classList.add('active');
     },
 
     // Generator: Ticket Template
@@ -333,9 +335,10 @@ const app = {
             </div>`;
         
         const link = document.getElementById('bookmarklet-link');
-        link.href = code;
+        if (link) link.href = code;
         
-        document.getElementById('startOverBtn').addEventListener('click', () => this.showStep(1));
+        const resetBtn = document.getElementById('startOverBtn');
+        if (resetBtn) resetBtn.addEventListener('click', () => this.showStep(1));
         this.showStep('3-result');
     }
 };

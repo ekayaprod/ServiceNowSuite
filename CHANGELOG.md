@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Chores
 - 🔧 Chore: Added comprehensive documentation including README, ROADMAP, and CONTRIBUTING guides.
 - 🔧 Chore: Added verification script and assets.
+- 🔧 Chore: Add automated Playwright tests for showResult DOM manipulation.
