@@ -1,0 +1,2 @@
+**Learning:** Fragmented routing causes loss of active filter state when users navigate between related data views. | **Action:** Consolidate related data views into a single container using progressive disclosure components like tabs.
+**Learning:** Separate tool generator pages cause a disjointed workflow. | **Action:** Consolidate standalone static HTML generator tools (like ticket automation and data extractor) into a single overarching dashboard application (`ticket_template.html`).
