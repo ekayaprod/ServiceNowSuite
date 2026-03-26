@@ -164,10 +164,20 @@ const app = {
     },
     
     showStep(n) {
+        // [SECURITY BOUNDARY] Enforce strict input validation to prevent invalid DOM queries
+        if (n === null || n === undefined || n === '') return;
+
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        const stepId = (typeof n === 'number' || !n.startsWith('step')) ? 'step' + n : n;
+        const stepStr = String(n);
+        const stepId = (typeof n === 'number' || !stepStr.startsWith('step')) ? 'step' + stepStr : stepStr;
         const el = document.getElementById(stepId);
-        if (el) el.classList.add('active');
+
+        // [SECURITY BOUNDARY] Strict null check before class mutation
+        if (el && el.classList) {
+            el.classList.add('active');
+        } else {
+            console.warn(`[showStep] Invalid target: ${stepId}`);
+        }
     },
 
     // Generator: Ticket Template
@@ -378,7 +388,12 @@ const app = {
 
     // Render result page
     showResult(code, name, title, instructions) {
+        // [SECURITY BOUNDARY] Strict null check on mandatory parameters
+        if (code === null || code === undefined || code === '' || name === null || name === undefined || name === '') return console.warn('[showResult] Missing required parameters');
+
         const container = document.getElementById('step3-result');
+        if (container === null || container === undefined) return console.warn('[showResult] Container not found');
+
         container.innerHTML = `
             <h2 class="text-2xl font-semibold mb-4 text-center text-slate-700">${title}</h2>
             <div class="bg-slate-100 p-6 rounded-lg text-center">
@@ -395,10 +410,15 @@ const app = {
             </div>`;
         
         const link = document.getElementById('bookmarklet-link');
-        if (link) link.href = code;
+        if (link) {
+            link.href = code;
+        }
         
         const resetBtn = document.getElementById('startOverBtn');
-        if (resetBtn) resetBtn.addEventListener('click', () => this.showStep(1));
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.showStep(1));
+        }
+
         this.showStep('3-result');
     }
 };
