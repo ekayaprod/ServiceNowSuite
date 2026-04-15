@@ -25,7 +25,7 @@
                 <!-- Step 1: Tool Selection -->
                 <div id="step1" class="step active">
                     <h2 class="text-2xl font-semibold text-slate-800 mb-6">Choose a Tool</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Card 1: Ticket Template (Inline) -->
                         <button id="btn-template" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
                             <h3 class="font-semibold text-lg text-slate-800">Ticket Template</h3>
@@ -45,6 +45,12 @@
                         <button id="btn-extractor" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
                             <h3 class="font-semibold text-lg text-slate-800">CSV Data Extractor</h3>
                             <p class="text-slate-500 mt-2 text-sm">Export list data to CSV</p>
+                        </button>
+
+                        <!-- Card 5: Interceptor -->
+                        <button id="btn-interceptor" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                            <h3 class="font-semibold text-lg text-slate-800">Queue Interceptor</h3>
+                            <p class="text-slate-500 mt-2 text-sm">Monitor queue and auto-assign</p>
                         </button>
                     </div>
                 </div>
@@ -131,6 +137,25 @@
                     </div>
                 </div>
 
+
+                <!-- Step 2e: Configure Interceptor -->
+                <div id="step2-interceptor" class="step">
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Configure: Queue Interceptor</h2>
+                    <div class="space-y-6">
+                        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
+                            Click the button below to generate a **Queue Interceptor** bookmarklet. Run it on a ServiceNow list to persistently monitor and claim tickets.
+                        </div>
+                        <div>
+                            <label for="bookmarkletName-interceptor" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
+                            <input type="text" id="bookmarkletName-interceptor" value="Queue Interceptor" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                        </div>
+                    </div>
+                    <div class="mt-8 flex justify-between items-center">
+                        <button id="backBtn-interceptor" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
+                        <button id="generateBtn-interceptor" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Interceptor Tool</button>
+                    </div>
+                </div>
+
                 <!-- Step 3: Result Page (Generic) -->
                 <div id="step3-result" class="step"></div>
             </main>
@@ -141,6 +166,7 @@
 <script src="js/generators/updater.js"></script>
 <script src="js/generators/automation.js"></script>
 <script src="js/generators/extractor.js"></script>
+<script src="js/generators/interceptor.js"></script>
 <script>
 const app = {
     init() {
@@ -149,6 +175,8 @@ const app = {
         document.getElementById('btn-updater').addEventListener('click', () => this.showStep('2-updater'));
         document.getElementById('btn-automation').addEventListener('click', () => this.showStep('2-automation'));
         document.getElementById('btn-extractor').addEventListener('click', () => this.showStep('2-extractor'));
+        document.getElementById('btn-interceptor').addEventListener('click', () => this.showStep('2-interceptor'));
+
         
         // Template config
         document.getElementById('backBtn-template').addEventListener('click', () => this.showStep(1));
@@ -165,6 +193,10 @@ const app = {
         // Extractor config
         document.getElementById('backBtn-extractor').addEventListener('click', () => this.showStep(1));
         document.getElementById('generateBtn-extractor').addEventListener('click', () => generateExtractor(this));
+
+        // Interceptor config
+        document.getElementById('backBtn-interceptor').addEventListener('click', () => this.showStep(1));
+        document.getElementById('generateBtn-interceptor').addEventListener('click', () => { if(typeof generateInterceptor === 'function') generateInterceptor(this); });
     },
     
     showStep(n) {
