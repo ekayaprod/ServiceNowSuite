@@ -25,7 +25,7 @@ function generateInterceptor(app) {
                 if(fv)return fv
             }
             return getE(w)
-        }catch(e){}
+        }catch(e){console.warn('[findEnvFn] Failed to find environment:', e.message);}
         return null
     }`;
 
