@@ -11,7 +11,7 @@ const generateUpdater = (app) => {
      * @param {Window} w - The window object to start searching from.
      * @returns {{type: 'form'|'list', context: {win: Window, g_form?: Object, listEl?: Element}} | null}
      */
-    const findEnvFn = `function(w){try{function e(t){let n=t.querySelector("#gsft_main,iframe[name=gsft_main]");if(n)return n;const o=t.querySelectorAll("*");for(const r of o)if(r.shadowRoot&&(n=e(r.shadowRoot)))return n;return null}function t(n){return n?n.g_form&&"function"==typeof n.g_form.getTableName?{type:"form",context:{win:n,g_form:n.g_form}}:n.document.querySelector("#task_table,.list_table,[data-list_id]")?{type:"list",context:{win:n,listEl:n.document.querySelector("#task_table,.list_table,[data-list_id]")}}:null:null}const n=e(w.document);if(n&&n.contentWindow){try{const o=t(n.contentWindow);if(o)return o}catch(o){console.debug("Cross-origin frame access blocked (expected):",o.message)}}return t(w)}catch(o){return console.error("Error finding ServiceNow environment:",o),null}}`;
+    const findEnvFn = `function(w){try{function e(t){let n=t.querySelector("#gsft_main,iframe[name=gsft_main]");if(n)return n;const o=t.querySelectorAll("*");for(const r of o)if(r.shadowRoot&&(n=e(r.shadowRoot)))return n;return null}function t(n){return n?n.g_form&&"function"==typeof n.g_form.getTableName?{type:"form",context:{win:n,g_form:n.g_form}}:n.document.querySelector("#task_table,.list_table,[data-list_id]")?{type:"list",context:{win:n,listEl:n.document.querySelector("#task_table,.list_table,[data-list_id]")}}:null:null}const n=e(w.document);if(n&&n.contentWindow){try{const o=t(n.contentWindow);if(o)return o}catch(o){console.debug("Cross-origin frame access blocked (expected):",o.message)}}return t(w)}catch(o){return console.error("Error finding ServiceNow environment:",o.message),null}}`;
 
     // Generate final tool script
     const updaterCode = `(function(){
@@ -148,7 +148,7 @@ const generateUpdater = (app) => {
                                     frame.src = url;
                                 });
                             } catch (e) {
-                                // Silently catch errors on individual tickets to allow bulk process to continue
+                                console.warn('Error updating individual ticket:', e.message);
                             }
                         }
                         alert('Deferred bulk update process has completed.');
