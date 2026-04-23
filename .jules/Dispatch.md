@@ -1,0 +1,3 @@
+**Learning:** A naked repository without CI/CD workflows or basic meta-infrastructure (e.g., CODEOWNERS, issue/PR templates) is an exposed supply line. Implementing fundamental deployment automation directly using standard GitHub action workflows (`actions/checkout`, `actions/configure-pages`, `actions/upload-pages-artifact`, `actions/deploy-pages`) establishes secure and fast code delivery.
+
+**Action:** Bootstrapped net-new CI/CD pipeline (`.github/workflows/pages.yml`) for the static site along with standard meta-infrastructure (`.github/CODEOWNERS`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/ISSUE_TEMPLATE/bug_report.md`) to establish proper baseline repository controls.
