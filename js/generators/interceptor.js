@@ -171,7 +171,11 @@ function generateInterceptor(app) {
                         g_form.setValue('assigned_to', g_user.userID);
                         g_form.save();
                         setTimeout(() => { frame.remove(); resolve(true); }, 2000);
-                    } catch(e) { frame.remove(); resolve(false); }
+                    } catch(e) {
+                        console.error(\`[assignTicket] Failed to assign ticket \${sysId}:\`, e.message);
+                        frame.remove();
+                        resolve(false);
+                    }
                 };
                 frame.onerror = () => {
                     frameLoaded = true;
@@ -265,7 +269,7 @@ function generateInterceptor(app) {
 
             } catch (err) {
                 console.error(err);
-                updateStatus('Error during processing.');
+                updateStatus(\`Error during processing: \${err.message}\`);
             } finally {
                 isProcessing = false;
             }
