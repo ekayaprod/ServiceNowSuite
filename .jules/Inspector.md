@@ -1,0 +1,2 @@
+**Learning:** UI logic embedded in global variables inside static HTML files requires careful test extraction to mock DOM APIs (like `getElementById` and `querySelectorAll`) and avoid tautological proofs.
+**Action:** Extract logic by reading the script block statically, execute in a bounded Node sandbox with Jest, and utilize the atomic Inversion Check (mutating null-checks temporarily) to assert test resilience against regressions.
