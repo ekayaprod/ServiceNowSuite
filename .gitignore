@@ -1,4 +1,3 @@
 node_modules/
 app_extracted.js
 jest.config.js
-ticket_template.test.js
