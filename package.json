@@ -1,0 +1,8 @@
+{
+  "name": "servicenowsuite",
+  "version": "1.0.0",
+  "description": "A client-side web application for generating ServiceNow automation bookmarklets.",
+  "scripts": {
+    "test": "echo \"No tests configured yet.\""
+  }
+}
