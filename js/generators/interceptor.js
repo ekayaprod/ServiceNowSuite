@@ -130,12 +130,12 @@ function generateInterceptor(app) {
                 let attempts = 0;
                 const check = () => {
                     if (win && win.g_form && typeof win.g_form.getValue === 'function' && win.g_user && win.g_user.userID) {
-                        resolve({ g_form: win.g_form, g_user: win.g_user });
-                    } else if (attempts++ < GFORM_MAX_ATTEMPTS) {
-                        setTimeout(check, GFORM_POLL_INTERVAL);
-                    } else {
-                        reject(new Error('g_form/g_user not available'));
+                        return resolve({ g_form: win.g_form, g_user: win.g_user });
                     }
+                    if (attempts++ < GFORM_MAX_ATTEMPTS) {
+                        return setTimeout(check, GFORM_POLL_INTERVAL);
+                    }
+                    reject(new Error('g_form/g_user not available'));
                 };
                 check();
              });
@@ -215,11 +215,11 @@ function generateInterceptor(app) {
                      // If column exists and is empty or has a specific empty representation
                      const isUnassigned = assignedCell && (!assignedCell.textContent.trim() || assignedCell.textContent.trim() === '(empty)');
 
-                     if (isUnassigned) {
-                         const shortDescCell = row.querySelector('td[glide_field="short_description"]');
-                         const shortDesc = shortDescCell ? shortDescCell.textContent.trim() : '';
-                         unassignedTickets.push({ sysId, shortDesc });
-                     }
+                     if (!isUnassigned) return;
+
+                     const shortDescCell = row.querySelector('td[glide_field="short_description"]');
+                     const shortDesc = shortDescCell ? shortDescCell.textContent.trim() : '';
+                     unassignedTickets.push({ sysId, shortDesc });
                 });
 
                 if (unassignedTickets.length === 0) {
@@ -252,20 +252,21 @@ function generateInterceptor(app) {
                      if (success) assignedCount++;
                 }
 
-                if (assignedCount > 0) {
-                     updateStatus(\`Assigned \${assignedCount} ticket(s). Refreshing...\`);
-
-                     // Try to trigger the list refresh native to ServiceNow
-                     const refreshBtn = currentWin.document.querySelector('button[data-type="list_refresh"]');
-                     if (refreshBtn) {
-                         refreshBtn.click();
-                     } else {
-                         // Fallback to location reload
-                         currentWin.location.reload();
-                     }
-                } else {
+                if (assignedCount === 0) {
                      updateStatus(\`Checked at \${new Date().toLocaleTimeString()}. Tickets were already assigned.\`);
+                     return;
                 }
+
+                updateStatus(\`Assigned \${assignedCount} ticket(s). Refreshing...\`);
+
+                // Try to trigger the list refresh native to ServiceNow
+                const refreshBtn = currentWin.document.querySelector('button[data-type="list_refresh"]');
+                if (refreshBtn) {
+                    return refreshBtn.click();
+                }
+
+                // Fallback to location reload
+                currentWin.location.reload();
 
             } catch (err) {
                 console.error(err);
@@ -283,16 +284,17 @@ function generateInterceptor(app) {
 
         const toggleTimer = () => {
              if (timerId) clearInterval(timerId);
-             if (activeCheckbox.checked) {
-                  const val = parseInt(intervalInput.value, 10);
-                  const interval = (isNaN(val) || val < 5) ? 5000 : val * 1000;
-                  timerId = setInterval(checkTick, interval);
-                  updateStatus('Monitoring active...');
-                  // Run immediately once when turned on
-                  processQueue();
-             } else {
+             if (!activeCheckbox.checked) {
                   updateStatus('Monitoring paused.');
+                  return;
              }
+
+             const val = parseInt(intervalInput.value, 10);
+             const interval = (isNaN(val) || val < 5) ? 5000 : val * 1000;
+             timerId = setInterval(checkTick, interval);
+             updateStatus('Monitoring active...');
+             // Run immediately once when turned on
+             processQueue();
         };
 
         activeCheckbox.addEventListener('change', toggleTimer);
