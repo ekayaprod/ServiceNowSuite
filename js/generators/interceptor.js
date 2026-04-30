@@ -11,7 +11,7 @@ function generateInterceptor(app) {
             function findFS(n){
                 let f=n.querySelector('#gsft_main,iframe[name="gsft_main"]');
                 if(f)return f;
-                for(const e of n.querySelectorAll('*'))if(e.shadowRoot&&(f=findFS(e.shadowRoot)))return f;
+                for(const e of n.querySelectorAll('*')){if(!e.shadowRoot)continue;f=findFS(e.shadowRoot);if(f)return f;}
                 return null
             }
             function getE(t){
