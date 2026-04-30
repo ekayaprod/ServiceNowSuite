@@ -122,6 +122,22 @@ function generateInterceptor(app) {
 
         const updateStatus = (msg) => { statusDiv.textContent = msg; };
 
+        class TicketAssignmentError extends Error {
+            constructor(message, cause) {
+                super(message);
+                this.name = 'TicketAssignmentError';
+                this.cause = cause;
+            }
+        }
+
+        class QueueProcessingError extends Error {
+            constructor(message, cause) {
+                super(message);
+                this.name = 'QueueProcessingError';
+                this.cause = cause;
+            }
+        }
+
         // Finds the assigned_to field and sets it to the current user
         // Using window.g_user to get the current user ID
         const assignTicket = async (sysId) => {
@@ -174,14 +190,14 @@ function generateInterceptor(app) {
                     } catch(e) {
                         console.error(\`[assignTicket] Failed to assign ticket \${sysId}:\`, e.message);
                         frame.remove();
-                        resolve(false);
+                        reject(new TicketAssignmentError(\`Failed to assign ticket \${sysId}\`, e));
                     }
                 };
                 frame.onerror = () => {
                     frameLoaded = true;
                     clearTimeout(frameTimeout);
                     frame.remove();
-                    resolve(false);
+                    reject(new TicketAssignmentError(\`Frame failed to load for ticket \${sysId}\`));
                 };
                 frame.src = url;
             });
@@ -248,8 +264,12 @@ function generateInterceptor(app) {
 
                 let assignedCount = 0;
                 for (const t of matchingTickets) {
-                     const success = await assignTicket(t.sysId);
-                     if (success) assignedCount++;
+                     try {
+                          const success = await assignTicket(t.sysId);
+                          if (success) assignedCount++;
+                     } catch (assignErr) {
+                          console.error(\`Failed assigning ticket \${t.sysId}:\`, assignErr);
+                     }
                 }
 
                 if (assignedCount === 0) {
@@ -269,8 +289,14 @@ function generateInterceptor(app) {
                 currentWin.location.reload();
 
             } catch (err) {
-                console.error(err);
+                console.error("Error during queue processing:", {
+                    error: err,
+                    message: err.message,
+                    stack: err.stack,
+                    targetWin: topWin
+                });
                 updateStatus(\`Error during processing: \${err.message}\`);
+                throw new QueueProcessingError("Failed to process the queue", err);
             } finally {
                 isProcessing = false;
             }
