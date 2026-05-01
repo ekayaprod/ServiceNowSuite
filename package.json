@@ -1,0 +1,24 @@
+{
+  "name": "servicenowsuite",
+  "version": "1.0.0",
+  "description": "A client-side web application for generating ServiceNow automation bookmarklets. The system employs a meta-builder architecture where static HTML pages generate builder bookmarklets, which in turn produce task-specific automation tools.",
+  "scripts": {
+    "test": "jest --passWithNoTests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ekayaprod/ServiceNowSuite.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ekayaprod/ServiceNowSuite/issues"
+  },
+  "homepage": "https://github.com/ekayaprod/ServiceNowSuite#readme",
+  "devDependencies": {
+    "jest": "30.3.0",
+    "jest-environment-jsdom": "30.3.0"
+  }
+}
