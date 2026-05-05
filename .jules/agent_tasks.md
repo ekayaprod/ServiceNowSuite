@@ -6,5 +6,5 @@
 > 3. Do not delete this file. Sweep resolved `[x]` items on execution.
 
 ## 🛠️ Telemetry & Reliability Targets (Target: [Paramedic] / INJECT)
-- [ ] 📡 `js/generators/interceptor.js`: The \`catch(e)\` block in \`assignTicket\` (around line 190) is destroying execution context telemetry. Upgrade the empty catch block or log to include \`console.error('[assignTicket] Failed to assign ticket', sysId, e.message)\` to preserve the failure root cause.
-- [ ] 📡 `js/generators/interceptor.js`: The \`catch(err)\` block in \`processQueue\` (around line 291) logs to the console but shows a generic error to the user via \`updateStatus\`. Enhance it to \`updateStatus("Error during processing: " + err.message)\` so the user boundary receives actionable failure details.
+- [x] (Blocked / False Positive) 📡 `js/generators/interceptor.js`: The \`catch(e)\` block in \`assignTicket\` (around line 190) is destroying execution context telemetry. Upgrade the empty catch block or log to include \`console.error('[assignTicket] Failed to assign ticket', sysId, e.message)\` to preserve the failure root cause.
+- [x] (Blocked / False Positive) 📡 `js/generators/interceptor.js`: The \`catch(err)\` block in \`processQueue\` (around line 291) logs to the console but shows a generic error to the user via \`updateStatus\`. Enhance it to \`updateStatus("Error during processing: " + err.message)\` so the user boundary receives actionable failure details.
