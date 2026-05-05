@@ -27,28 +27,28 @@
                     <h2 class="text-2xl font-semibold text-slate-800 mb-6">Choose a Tool</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Card 1: Ticket Template (Inline) -->
-                        <button id="btn-template" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                        <button id="btn-template" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
                             <h3 class="font-semibold text-lg text-slate-800">Ticket Template</h3>
                             <p class="text-slate-500 mt-2 text-sm">Fill new tickets instantly</p>
                         </button>
                         <!-- Card 2: Deferred Updater (Inline) -->
-                        <button id="btn-updater" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                        <button id="btn-updater" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
                             <h3 class="font-semibold text-lg text-slate-800">Deferred Bulk Updater</h3>
                             <p class="text-slate-500 mt-2 text-sm">Schedule bulk comments</p>
                         </button>
                         <!-- Card 3: Universal Automation (Inline) -->
-                        <button id="btn-automation" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                        <button id="btn-automation" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
                             <h3 class="font-semibold text-lg text-slate-800">Universal Automation</h3>
                             <p class="text-slate-500 mt-2 text-sm">Complex, rule-based logic</p>
                         </button>
                         <!-- Card 4: Data Extractor (Inline) -->
-                        <button id="btn-extractor" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                        <button id="btn-extractor" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
                             <h3 class="font-semibold text-lg text-slate-800">CSV Data Extractor</h3>
                             <p class="text-slate-500 mt-2 text-sm">Export list data to CSV</p>
                         </button>
 
                         <!-- Card 5: Interceptor -->
-                        <button id="btn-interceptor" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                        <button id="btn-interceptor" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
                             <h3 class="font-semibold text-lg text-slate-800">Queue Interceptor</h3>
                             <p class="text-slate-500 mt-2 text-sm">Monitor queue and auto-assign</p>
                         </button>
@@ -71,12 +71,12 @@
                         </div>
                         <div>
                             <label for="bookmarkletName-template" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
-                            <input type="text" id="bookmarkletName-template" value="Ticket Template" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                            <input type="text" id="bookmarkletName-template" value="Ticket Template" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200">
                         </div>
                     </div>
                     <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-template" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
-                        <button id="generateBtn-template" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Template Bookmarklet</button>
+                        <button id="backBtn-template" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
+                        <button id="generateBtn-template" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Template Bookmarklet</button>
                     </div>
                 </div>
 
@@ -89,19 +89,19 @@
                         </div>
                         <div>
                             <label for="commentField" class="block text-sm font-medium text-slate-700">Target Comment Field</label>
-                            <select id="commentField" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                            <select id="commentField" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200">
                                 <option value="work_notes" selected>Work Notes (Internal)</option>
                                 <option value="comments">Additional Comments (Customer Visible)</option>
                             </select>
                         </div>
                         <div>
                             <label for="bookmarkletName-updater" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
-                            <input type="text" id="bookmarkletName-updater" value="Deferred Updater" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                            <input type="text" id="bookmarkletName-updater" value="Deferred Updater" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200">
                         </div>
                     </div>
                     <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-updater" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
-                        <button id="generateBtn-updater" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Updater Bookmarklet</button>
+                        <button id="backBtn-updater" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
+                        <button id="generateBtn-updater" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Updater Bookmarklet</button>
                     </div>
                 </div>
 
@@ -114,12 +114,12 @@
                         </div>
                         <div>
                             <label for="bookmarkletName-automation" class="block text-sm font-medium text-slate-700">Builder Bookmarklet Name</label>
-                            <input type="text" id="bookmarkletName-automation" value="Automation Builder" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                            <input type="text" id="bookmarkletName-automation" value="Automation Builder" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200">
                         </div>
                     </div>
                     <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-automation" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
-                        <button id="generateBtn-automation" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Automation Bookmarklet</button>
+                        <button id="backBtn-automation" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
+                        <button id="generateBtn-automation" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Automation Bookmarklet</button>
                     </div>
                 </div>
 
@@ -132,8 +132,8 @@
                         </div>
                     </div>
                     <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-extractor" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
-                        <button id="generateBtn-extractor" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Extractor Bookmarklet</button>
+                        <button id="backBtn-extractor" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
+                        <button id="generateBtn-extractor" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Extractor Bookmarklet</button>
                     </div>
                 </div>
 
@@ -147,12 +147,12 @@
                         </div>
                         <div>
                             <label for="bookmarkletName-interceptor" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
-                            <input type="text" id="bookmarkletName-interceptor" value="Queue Interceptor" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm">
+                            <input type="text" id="bookmarkletName-interceptor" value="Queue Interceptor" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200">
                         </div>
                     </div>
                     <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-interceptor" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Back</button>
-                        <button id="generateBtn-interceptor" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Interceptor Bookmarklet</button>
+                        <button id="backBtn-interceptor" class="px-6 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
+                        <button id="generateBtn-interceptor" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Interceptor Bookmarklet</button>
                     </div>
                 </div>
 
@@ -236,7 +236,7 @@ const app = {
                 ${instructions}
             </div>
             <div class="mt-6 text-center">
-                <button id="startOverBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-600 hover:bg-slate-700">Create Another Bookmarklet</button>
+                <button id="startOverBtn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-600 hover:bg-slate-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Create Another Bookmarklet</button>
             </div>`;
         
         const link = document.getElementById('bookmarklet-link');
