@@ -112,7 +112,7 @@ const generateUpdater = (app) => {
                         const GFORM_POLL_INTERVAL = 100, GFORM_MAX_ATTEMPTS = 50, SAVE_DELAY_MS = 1500;
                         const waitForGForm = (win) => new Promise((resolve, reject) => { let attempts = 0; const check = () => { if (win && win.g_form && typeof win.g_form.getValue === 'function') { resolve(win.g_form); } else if (attempts++ < GFORM_MAX_ATTEMPTS) { setTimeout(check, GFORM_POLL_INTERVAL); } else { reject(new Error('g_form not available')); } }; check(); });
 
-                        for (const sysId of selectedIds) {
+                        const updateTicket = async (sysId) => {
                             try {
                                 const url = '/' + tableName + '.do?sys_id=' + sysId + '&sysparm_nostack=true';
                                 const frame = document.createElement('iframe');
@@ -150,6 +150,11 @@ const generateUpdater = (app) => {
                             } catch (e) {
                                 console.warn('Error updating individual ticket:', e.message);
                             }
+                        };
+
+                        for (let i = 0; i < selectedIds.length; i += 5) {
+                            const chunk = selectedIds.slice(i, i + 5);
+                            await Promise.all(chunk.map(updateTicket));
                         }
                         alert('Deferred bulk update process has completed.');
                     })();
