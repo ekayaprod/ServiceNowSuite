@@ -1,47 +1,42 @@
 function generateInterceptor(app) {
-    // [SECURITY BOUNDARY] Ensure app instance is provided
-    if (!app) return console.warn('[generateInterceptor] Missing app context');
+    if (!app) return;
 
     const nameEl = document.getElementById('bookmarkletName-interceptor');
     const name = nameEl ? nameEl.value : 'Queue Interceptor';
 
-    // The entire bookmarklet logic is defined as a standard JavaScript function.
-    // This entirely avoids template literal escaping and brittle string minification.
     const bookmarkletPayload = async function() {
+        const topWin = window.top;
+
         const findEnv = function(w) {
             try {
                 function findFS(n) {
                     let f = n.querySelector('#gsft_main,iframe[name="gsft_main"]');
                     if (f) return f;
-                    for (const e of n.querySelectorAll('*')) {
-                        if (!e.shadowRoot) continue;
-                        f = findFS(e.shadowRoot);
-                        if (f) return f;
-                    }
+                    const a = n.querySelectorAll('*');
+                    for (const e of a) if (e.shadowRoot && (f = findFS(e.shadowRoot))) return f;
                     return null;
                 }
-                function getE(t) {
+                function gC(t) {
                     if (!t) return null;
+                    if (t.g_form && typeof t.g_form.getTableName === 'function') return { type: 'form', ctx: { w: t, g: t.g_form } };
                     const l = t.document.querySelector('#task_table,.list_table,[data-list_id]');
-                    return l ? { type: 'list', ctx: { win: t, listEl: l } } : null;
+                    if (l) return { type: 'list', ctx: { w: t, l } };
+                    return null;
                 }
                 const fe = findFS(w.document);
                 if (fe && fe.contentWindow) {
-                    const fv = getE(fe.contentWindow);
+                    const fv = gC(fe.contentWindow);
                     if (fv) return fv;
                 }
-                return getE(w);
+                return gC(w);
             } catch (e) {
-                console.warn('[findEnvFn] Failed to find environment:', e.message);
+                return null;
             }
-            return null;
         };
 
-        const topWin = window.top;
         const env = findEnv(topWin);
-
         if (!env || env.type !== 'list') {
-            alert('This tool must be run on a ServiceNow list view. Please navigate to a list and try again.');
+            alert('This tool must be run on a ServiceNow list view.');
             return;
         }
 
@@ -50,338 +45,278 @@ function generateInterceptor(app) {
             return;
         }
 
-        const { win: winCtx, listEl } = env.ctx;
+        const winCtx = env.ctx.w;
+        const listEl = env.ctx.l;
         const tableName = listEl.getAttribute('glide_table') || 'task';
+        const targetUserId = (winCtx.g_user && winCtx.g_user.userID) || '3688734ec3e25e98e2e1d00c050131b9';
 
-        // Local Storage Cache Management
         const CACHE_KEY = 'sn_interceptor_skipped_tickets';
         const getSkippedCache = () => JSON.parse(topWin.localStorage.getItem(CACHE_KEY) || '{}');
         const setSkippedCache = (data) => topWin.localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-        
         const updateCacheUI = () => {
             const countEl = topWin.document.getElementById('sn-interceptor-skip-count');
             if (countEl) countEl.textContent = Object.keys(getSkippedCache()).length;
         };
-
         const toggleSkipState = (sysId, ticketNum) => {
             const cache = getSkippedCache();
-            if (cache[sysId]) {
-                delete cache[sysId];
-            } else {
-                cache[sysId] = ticketNum || 'Unknown';
-            }
+            if (cache[sysId]) delete cache[sysId];
+            else cache[sysId] = ticketNum || 'Unknown';
             setSkippedCache(cache);
             updateCacheUI();
         };
 
-        const modalHTML = `
-        <div id="sn-interceptor-modal" style="position:fixed;top:20px;right:20px;width:320px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:999999;font-family:sans-serif;border:1px solid #ddd;display:flex;flex-direction:column;overflow:hidden;">
-            <div id="sn-interceptor-header" style="background:#0066cc;color:#fff;padding:10px 15px;cursor:grab;display:flex;justify-content:space-between;align-items:center;user-select:none;">
-                <span style="font-weight:bold;font-size:14px;">Queue Interceptor</span>
-                <button id="sn-interceptor-close" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px;">&times;</button>
-            </div>
-            <div style="padding:15px;display:flex;flex-direction:column;gap:10px;">
-                <div>
-                    <label style="font-size:12px;font-weight:bold;color:#555;">Keywords (comma separated)</label>
-                    <input type="text" id="sn-interceptor-keywords" placeholder="e.g. VIP, Urgent, Database" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;margin-top:4px;" />
-                </div>
-                <div>
-                    <label style="font-size:12px;font-weight:bold;color:#555;">Refresh Interval (seconds)</label>
-                    <input type="number" id="sn-interceptor-interval" value="30" min="5" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;margin-top:4px;" />
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#f5f5f5;border-radius:4px;border:1px solid #eee;">
-                    <span style="font-size:12px;color:#333;">Skipped Tickets: <strong id="sn-interceptor-skip-count">0</strong></span>
-                    <button id="sn-interceptor-clear-skip" style="font-size:10px;padding:3px 6px;cursor:pointer;border:1px solid #ccc;background:#fff;border-radius:3px;color:#d9534f;font-weight:bold;">Clear</button>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
-                    <input type="checkbox" id="sn-interceptor-active" />
-                    <label for="sn-interceptor-active" style="font-size:14px;font-weight:bold;cursor:pointer;">Active Monitoring</label>
-                </div>
-                <div id="sn-interceptor-status" style="font-size:11px;color:#666;margin-top:5px;min-height:16px;">Ready.</div>
-            </div>
-        </div>
-        `;
+        const modalHTML = '<div id="sn-interceptor-modal" style="position:fixed;top:20px;right:20px;width:320px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:999999;font-family:sans-serif;border:1px solid #ddd;display:flex;flex-direction:column;overflow:hidden;">' +
+            '<div id="sn-interceptor-header" style="background:#0066cc;color:#fff;padding:10px 15px;cursor:grab;display:flex;justify-content:space-between;align-items:center;user-select:none;">' +
+                '<span style="font-weight:bold;font-size:14px;">Queue Interceptor</span>' +
+                '<button id="sn-interceptor-close" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px;">&times;</button>' +
+            '</div>' +
+            '<div style="padding:15px;display:flex;flex-direction:column;gap:10px;">' +
+                '<div>' +
+                    '<label style="font-size:12px;font-weight:bold;color:#555;">Keywords</label>' +
+                    '<input type="text" id="sn-interceptor-keywords" value="Distribution Lists, Resource Account, Security Group, Shared Folder, VPN" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;margin-top:4px;font-size:11px;" />' +
+                    '<div id="sn-interceptor-presets" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;"></div>' +
+                '</div>' +
+                '<div>' +
+                    '<label style="font-size:12px;font-weight:bold;color:#555;">Interval (s)</label>' +
+                    '<input type="number" id="sn-interceptor-interval" value="15" min="5" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;margin-top:4px;" />' +
+                '</div>' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#f5f5f5;border-radius:4px;">' +
+                    '<span style="font-size:11px;">Skipped: <strong id="sn-interceptor-skip-count">0</strong></span>' +
+                    '<button id="sn-interceptor-clear-skip" style="font-size:9px;padding:2px 4px;cursor:pointer;border:1px solid #ccc;background:#fff;border-radius:3px;">Clear</button>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;">' +
+                    '<input type="checkbox" id="sn-interceptor-active" />' +
+                    '<label for="sn-interceptor-active" style="font-size:13px;font-weight:bold;cursor:pointer;">Active Monitoring</label>' +
+                '</div>' +
+                '<div id="sn-interceptor-status" style="font-size:10px;color:#666;min-height:14px;">Ready.</div>' +
+                '<div style="font-size:11px;font-weight:bold;color:#555;border-top:1px solid #eee;padding-top:8px;">Recent Assignments</div>' +
+                '<div id="sn-interceptor-history" style="font-size:10px;color:#333;height:85px;overflow-y:auto;background:#f9f9f9;border:1px solid #eee;border-radius:4px;padding:4px;"></div>' +
+            '</div>' +
+        '</div>';
 
         topWin.document.body.insertAdjacentHTML('beforeend', modalHTML);
 
         const modalEl = topWin.document.getElementById('sn-interceptor-modal');
-        const headerEl = topWin.document.getElementById('sn-interceptor-header');
-        const closeBtn = topWin.document.getElementById('sn-interceptor-close');
         const keywordsInput = topWin.document.getElementById('sn-interceptor-keywords');
-        const intervalInput = topWin.document.getElementById('sn-interceptor-interval');
-        const activeCheckbox = topWin.document.getElementById('sn-interceptor-active');
+        const presetDiv = topWin.document.getElementById('sn-interceptor-presets');
         const statusDiv = topWin.document.getElementById('sn-interceptor-status');
-        const clearSkipBtn = topWin.document.getElementById('sn-interceptor-clear-skip');
+        const historyDiv = topWin.document.getElementById('sn-interceptor-history');
+        const activeCheckbox = topWin.document.getElementById('sn-interceptor-active');
 
-        updateCacheUI();
-
-        clearSkipBtn.addEventListener('click', () => {
+        topWin.document.getElementById('sn-interceptor-clear-skip').onclick = () => {
             if (confirm('Clear all skipped tickets from local cache?')) {
                 topWin.localStorage.removeItem(CACHE_KEY);
                 updateCacheUI();
+                injectUIHooks();
             }
-        });
-
-        let isDragging = false, startX, startY, initialLeft, initialTop;
-        const onMouseMove = (e) => {
-            if (!isDragging) return;
-            modalEl.style.left = `${initialLeft + (e.clientX - startX)}px`;
-            modalEl.style.top = `${initialTop + (e.clientY - startY)}px`;
-            modalEl.style.right = 'auto';
         };
-        const onMouseUp = () => {
-            isDragging = false;
-            headerEl.style.cursor = 'grab';
-            topWin.document.removeEventListener('mousemove', onMouseMove);
-            topWin.document.removeEventListener('mouseup', onMouseUp);
+
+        topWin.document.getElementById('sn-interceptor-close').onclick = () => { 
+            if(queueTimerId) clearInterval(queueTimerId); 
+            if(uiTimerId) clearInterval(uiTimerId); 
+            modalEl.remove(); 
         };
-        headerEl.addEventListener('mousedown', (e) => {
-            if (e.target === closeBtn) return;
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            const rect = modalEl.getBoundingClientRect();
-            initialLeft = rect.left;
-            initialTop = rect.top;
-            headerEl.style.cursor = 'grabbing';
-            topWin.document.addEventListener('mousemove', onMouseMove);
-            topWin.document.addEventListener('mouseup', onMouseUp);
-        });
 
-        let queueTimerId = null;
-        let uiTimerId = null;
-        let isProcessing = false;
+        const header = topWin.document.getElementById('sn-interceptor-header');
+        header.onmousedown = (e) => {
+            if (e.target.id === 'sn-interceptor-close') return;
+            let startX = e.clientX, startY = e.clientY, rect = modalEl.getBoundingClientRect();
+            let initialLeft = rect.left, initialTop = rect.top;
+            const move = (me) => { modalEl.style.left = (initialLeft + (me.clientX - startX)) + 'px'; modalEl.style.top = (initialTop + (me.clientY - startY)) + 'px'; modalEl.style.right = 'auto'; };
+            const up = () => { topWin.document.removeEventListener('mousemove', move); topWin.document.removeEventListener('mouseup', up); };
+            topWin.document.addEventListener('mousemove', move);
+            topWin.document.addEventListener('mouseup', up);
+        };
 
-        const updateStatus = (msg) => { statusDiv.textContent = msg; };
+        const getKeywords = () => keywordsInput.value.toLowerCase().split(',').map(k => k.trim()).filter(Boolean);
+        const logAssignment = (ticketNum, shortDesc) => {
+            const entry = topWin.document.createElement('div');
+            entry.style.cssText = 'border-bottom:1px solid #eee; margin-bottom:2px; padding-bottom:2px;';
+            entry.innerHTML = '<span style="color:#0066cc;">[' + new Date().toLocaleTimeString() + ']</span> <strong>' + ticketNum + '</strong>';
+            historyDiv.prepend(entry);
+            if (historyDiv.children.length > 10) historyDiv.lastChild.remove();
+        };
 
-        class TicketAssignmentError extends Error {
-            constructor(message, cause) {
-                super(message);
-                this.name = 'TicketAssignmentError';
-                this.cause = cause;
-            }
-        }
+        const renderPresets = () => {
+            const list = ['Distribution Lists', 'Resource Account', 'Security Group', 'Shared Folder', 'VPN'];
+            const current = getKeywords();
+            presetDiv.innerHTML = list.map(kw => {
+                const active = current.includes(kw.toLowerCase());
+                const bg = active ? '#0066cc' : '#f1f3f4';
+                const col = active ? '#fff' : '#555';
+                const icon = active ? '\u2713' : '+';
+                return '<span class="sn-preset-btn" data-kw="' + kw + '" style="background:' + bg + ';color:' + col + ';border:1px solid #ccc;font-size:9px;padding:1px 5px;border-radius:10px;cursor:pointer;">' + icon + ' ' + kw + '</span>';
+            }).join('');
+        };
+        
+        presetDiv.onclick = (e) => {
+            const btn = e.target.closest('.sn-preset-btn'); 
+            if (!btn) return;
+            let kw = btn.getAttribute('data-kw'), kws = getKeywords();
+            const idx = kws.indexOf(kw.toLowerCase());
+            if (idx > -1) kws.splice(idx, 1); 
+            else kws.push(kw);
+            keywordsInput.value = kws.join(', ');
+            renderPresets(); 
+            injectUIHooks();
+        };
+        
+        renderPresets(); 
+        updateCacheUI();
 
-        const assignTicket = async (sysId) => {
-            const GFORM_POLL_INTERVAL = 100, GFORM_MAX_ATTEMPTS = 50;
-            const waitForGForm = (win) => new Promise((resolve, reject) => {
-                let attempts = 0;
-                const check = () => {
-                    if (win && win.g_form && typeof win.g_form.getValue === 'function' && win.g_user && win.g_user.userID) {
-                        return resolve({ g_form: win.g_form, g_user: win.g_user });
-                    }
-                    if (attempts++ < GFORM_MAX_ATTEMPTS) return setTimeout(check, GFORM_POLL_INTERVAL);
-                    reject(new Error('g_form/g_user not available within iframe'));
-                };
-                check();
+        const getColIndexes = (l) => {
+            const idxs = { a: -1, d: -1, n: -1 };
+            const headers = l.querySelectorAll('th.list_header_cell, th.list_hdr, .list_header th');
+            Array.from(headers).forEach((th, i) => {
+                const attr = (th.getAttribute('glide_field') || th.getAttribute('name') || '').toLowerCase();
+                if (attr.includes('assigned_to')) idxs.a = i;
+                else if (attr.includes('short_description')) idxs.d = i;
+                else if (attr.includes('number')) idxs.n = i;
             });
+            return idxs;
+        };
 
-            return new Promise((resolve, reject) => {
-                const url = `/${tableName}.do?sys_id=${sysId}&sysparm_nostack=true`;
-                const frame = topWin.document.createElement('iframe');
-                frame.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;';
-                topWin.document.body.appendChild(frame);
-                
-                let frameLoaded = false;
-                const frameTimeout = setTimeout(() => {
-                    if (!frameLoaded) {
-                        frame.remove();
-                        reject(new Error('Frame load timeout'));
-                    }
-                }, 10000);
-
-                frame.onload = async () => {
-                    frameLoaded = true;
-                    clearTimeout(frameTimeout);
+        const assignTicket = (sysId) => new Promise((resolve, reject) => {
+            const url = '/' + tableName + '.do?sys_id=' + sysId + '&sysparm_nostack=true';
+            const fr = topWin.document.createElement('iframe');
+            fr.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;border:none;';
+            let to = setTimeout(() => { fr.remove(); reject('timeout'); }, 10000);
+            fr.onload = () => {
+                setTimeout(() => {
                     try {
-                        const { g_form, g_user } = await waitForGForm(frame.contentWindow);
-                        const currentAssignee = g_form.getValue('assigned_to');
-                        if (currentAssignee) {
-                            setTimeout(() => { frame.remove(); resolve(false); }, 500);
-                            return;
+                        const targetEnv = findEnv(fr.contentWindow);
+                        if (targetEnv && targetEnv.ctx && targetEnv.ctx.g) {
+                            const g = targetEnv.ctx.g;
+                            if (g.getValue('assigned_to')) { fr.remove(); clearTimeout(to); resolve(false); return; }
+                            g.setValue('assigned_to', targetUserId);
+                            g.save();
+                            setTimeout(() => { fr.remove(); clearTimeout(to); resolve(true); }, 1500);
                         }
-                        g_form.setValue('assigned_to', g_user.userID);
-                        g_form.save();
-                        setTimeout(() => { frame.remove(); resolve(true); }, 2000);
-                    } catch (e) {
-                        frame.remove();
-                        reject(new TicketAssignmentError(`Failed to assign ticket ${sysId}`, e));
-                    }
-                };
-                frame.onerror = () => {
-                    frameLoaded = true;
-                    clearTimeout(frameTimeout);
-                    frame.remove();
-                    reject(new TicketAssignmentError(`Frame failed to load for ticket ${sysId}`));
-                };
-                frame.src = url;
-            });
-        };
+                    } catch(e) { fr.remove(); clearTimeout(to); reject(e); }
+                }, 500);
+            };
+            topWin.document.body.appendChild(fr);
+            fr.src = url;
+        });
 
         const injectUIHooks = () => {
-            const currentEnv = findEnv(topWin);
-            if (!currentEnv || currentEnv.type !== 'list') return;
-            const { win: currentWin, listEl: currentListEl } = currentEnv.ctx;
-            const cache = getSkippedCache();
+            const current = findEnv(topWin); 
+            if (!current || current.type !== 'list') return;
+            const curWin = current.ctx.w;
+            const curList = current.ctx.l;
+            const cols = getColIndexes(curList); 
+            if (cols.a === -1) return;
+            const cache = getSkippedCache(); 
+            const kws = getKeywords();
             
-            const rows = currentListEl.querySelectorAll('tbody > tr[sys_id]');
-            rows.forEach(row => {
+            curList.querySelectorAll('tbody > tr[sys_id]').forEach(row => {
                 const sysId = row.getAttribute('sys_id');
-                if (!sysId) return;
+                const assignedCell = row.cells[cols.a];
+                if (!assignedCell || (assignedCell.textContent.trim() && assignedCell.textContent.trim() !== '(empty)')) return;
                 
-                const assignedCell = row.querySelector('td[glide_field="assigned_to"]');
-                const isUnassigned = assignedCell && (!assignedCell.textContent.trim() || assignedCell.textContent.trim() === '(empty)');
-                
-                if (isUnassigned) {
-                    let btn = row.querySelector('.sn-interceptor-skip-btn');
-                    if (!btn) {
-                        btn = currentWin.document.createElement('button');
-                        btn.className = 'sn-interceptor-skip-btn';
-                        btn.style.cssText = 'margin-left:8px;font-size:10px;padding:2px 5px;border-radius:3px;cursor:pointer;border:1px solid #ccc;vertical-align:middle;';
-                        assignedCell.appendChild(btn);
-                    }
-                    
-                    const isSkipped = !!cache[sysId];
-                    btn.textContent = isSkipped ? '🚫 Skipped' : 'Skip';
-                    btn.style.background = isSkipped ? '#fce8e6' : '#fff';
-                    btn.style.color = isSkipped ? '#c5221f' : '#333';
-                    btn.style.borderColor = isSkipped ? '#f2b8b5' : '#ccc';
-                    
-                    btn.onclick = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const numCell = row.querySelector('td[glide_field="number"]');
-                        const tNum = numCell ? numCell.textContent.trim() : sysId;
-                        toggleSkipState(sysId, tNum);
-                        injectUIHooks();
-                    };
-                } else {
-                    const btn = row.querySelector('.sn-interceptor-skip-btn');
-                    if (btn) btn.remove();
+                let ui = row.querySelector('.sn-interceptor-ui');
+                if (!ui) { 
+                    ui = curWin.document.createElement('div'); 
+                    ui.className = 'sn-interceptor-ui'; 
+                    ui.style.marginLeft = '5px'; 
+                    assignedCell.appendChild(ui); 
                 }
+                
+                const skipped = !!cache[sysId];
+                const dCell = row.cells[cols.d];
+                const desc = dCell ? dCell.textContent.trim().toLowerCase() : '';
+                const match = kws.length === 0 || kws.some(k => desc.includes(k));
+                
+                const bg = skipped ? '#fee' : (match ? '#efe' : '#f5f5f5');
+                const txt = skipped ? '\uD83D\uDEAB Skip' : (match ? '\uD83C\uDFAF Pick' : '\u26AA Ignore');
+                const btnTxt = skipped ? 'Unskip' : 'Skip';
+
+                ui.innerHTML = '<span style="font-size:9px; font-weight:bold; padding:1px 4px; border-radius:4px; background:' + bg + '">' + txt + '</span>' +
+                               '<button style="font-size:9px; cursor:pointer; margin-left:3px;">' + btnTxt + '</button>';
+                
+                row.style.background = skipped ? 'rgba(255,0,0,0.05)' : (match ? 'rgba(0,255,0,0.05)' : '');
+                
+                ui.querySelector('button').onclick = (e) => { 
+                    e.preventDefault(); 
+                    e.stopPropagation(); 
+                    const nCell = row.cells[cols.n];
+                    toggleSkipState(sysId, nCell ? nCell.textContent.trim() : ''); 
+                    injectUIHooks(); 
+                };
             });
         };
 
         const processQueue = async () => {
-            if (isProcessing) return;
-            isProcessing = true;
-            try {
-                const currentEnv = findEnv(topWin);
-                if (!currentEnv || currentEnv.type !== 'list') {
-                    updateStatus('Error: Not on a list view.');
-                    isProcessing = false;
-                    return;
+            const current = findEnv(topWin); 
+            if (!current || current.type !== 'list') return;
+            const curWin = current.ctx.w;
+            const curList = current.ctx.l;
+            const cols = getColIndexes(curList); 
+            if (cols.a === -1) return;
+            
+            const cache = getSkippedCache();
+            const kws = getKeywords();
+            const matches = [];
+            
+            curList.querySelectorAll('tbody > tr[sys_id]').forEach(row => {
+                const id = row.getAttribute('sys_id');
+                const assigned = row.cells[cols.a];
+                if (!id || cache[id] || (assigned.textContent.trim() && assigned.textContent.trim() !== '(empty)')) return;
+                const dCell = row.cells[cols.d];
+                const desc = dCell ? dCell.textContent.trim() : '';
+                if (kws.length === 0 || kws.some(k => desc.toLowerCase().includes(k))) {
+                    const nCell = row.cells[cols.n];
+                    matches.push({ id: id, desc: desc, num: nCell ? nCell.textContent.trim() : '' });
                 }
-                const { win: currentWin, listEl: currentListEl } = currentEnv.ctx;
-                const rows = Array.from(currentListEl.querySelectorAll('tbody > tr[sys_id]'));
-                const cache = getSkippedCache();
-                const unassignedTickets = [];
+            });
 
-                rows.forEach(row => {
-                    const sysId = row.getAttribute('sys_id');
-                    if (!sysId || cache[sysId]) return;
-                    
-                    const assignedCell = row.querySelector('td[glide_field="assigned_to"]');
-                    const isUnassigned = assignedCell && (!assignedCell.textContent.trim() || assignedCell.textContent.trim() === '(empty)');
-                    if (!isUnassigned) return;
-                    
-                    const shortDescCell = row.querySelector('td[glide_field="short_description"]');
-                    const shortDesc = shortDescCell ? shortDescCell.textContent.trim() : '';
-                    unassignedTickets.push({ sysId, shortDesc });
-                });
-
-                if (unassignedTickets.length === 0) {
-                    updateStatus(`Checked at ${new Date().toLocaleTimeString()}. No pending tickets.`);
-                    isProcessing = false;
-                    return;
-                }
-
-                const kwStr = keywordsInput.value.trim().toLowerCase();
-                const keywords = kwStr ? kwStr.split(',').map(k => k.trim()).filter(Boolean) : [];
-                
-                const matchingTickets = unassignedTickets.filter(t => {
-                    if (keywords.length === 0) return true;
-                    const desc = t.shortDesc.toLowerCase();
-                    return keywords.some(k => desc.includes(k));
-                });
-
-                if (matchingTickets.length === 0) {
-                    updateStatus(`Checked at ${new Date().toLocaleTimeString()}. No keyword matches.`);
-                    isProcessing = false;
-                    return;
-                }
-
-                updateStatus(`Intercepting ${matchingTickets.length} ticket(s)...`);
-                let assignedCount = 0;
-                
-                for (const t of matchingTickets) {
-                    try {
-                        const success = await assignTicket(t.sysId);
-                        if (success) assignedCount++;
-                    } catch (assignErr) {
-                        console.error(`Failed assigning ticket ${t.sysId}:`, assignErr);
-                    }
-                }
-
-                if (assignedCount === 0) {
-                    updateStatus(`Checked at ${new Date().toLocaleTimeString()}. Match found but already assigned.`);
-                    return;
-                }
-
-                updateStatus(`Assigned ${assignedCount} ticket(s). Refreshing...`);
-                const refreshBtn = currentWin.document.querySelector('button[data-type="list_refresh"]');
-                if (refreshBtn) {
-                    return refreshBtn.click();
-                }
-                currentWin.location.reload();
-                
-            } catch (err) {
-                console.error("Error during queue processing:", err);
-                updateStatus(`Error: ${err.message}`);
-            } finally {
-                isProcessing = false;
+            if (!matches.length) { 
+                statusDiv.textContent = 'Checked at ' + new Date().toLocaleTimeString() + '. No matches.'; 
+                return; 
             }
+            statusDiv.textContent = 'Claiming ' + matches.length + ' ticket(s)...';
+            
+            let assignedCount = 0;
+            for (const m of matches) {
+                try { 
+                    if (await assignTicket(m.id)) {
+                        logAssignment(m.num, m.desc); 
+                        assignedCount++;
+                    } 
+                } catch(e) {}
+            }
+            
+            if (assignedCount === 0) return;
+            
+            if (curWin.GlideList2) curWin.GlideList2.get(curList.getAttribute('data-list_id') || tableName)?.refresh();
+            else curWin.location.reload();
         };
 
-        const checkTick = () => {
-            if (activeCheckbox.checked) processQueue();
-        };
-
-        const toggleTimer = () => {
+        let queueTimerId = null;
+        let uiTimerId = setInterval(injectUIHooks, 1500);
+        
+        activeCheckbox.onchange = () => {
             if (queueTimerId) clearInterval(queueTimerId);
-            if (!activeCheckbox.checked) {
-                updateStatus('Monitoring paused.');
-                return;
-            }
-            const val = parseInt(intervalInput.value, 10);
-            const interval = (isNaN(val) || val < 5) ? 5000 : val * 1000;
-            queueTimerId = setInterval(checkTick, interval);
-            updateStatus('Monitoring active...');
+            if (!activeCheckbox.checked) { statusDiv.textContent = 'Paused.'; return; }
+            const ms = Math.max(5, parseInt(topWin.document.getElementById('sn-interceptor-interval').value, 10)) * 1000;
+            queueTimerId = setInterval(processQueue, ms);
             processQueue();
         };
-
-        uiTimerId = setInterval(injectUIHooks, 1500);
-
-        activeCheckbox.addEventListener('change', toggleTimer);
-        intervalInput.addEventListener('change', toggleTimer);
         
-        closeBtn.addEventListener('click', () => {
-            if (queueTimerId) clearInterval(queueTimerId);
-            if (uiTimerId) clearInterval(uiTimerId);
-            modalEl.remove();
+        keywordsInput.addEventListener('input', () => {
+            renderPresets();
+            injectUIHooks();
         });
     };
 
-    // Extract the exact function body text dynamically
-    const funcString = bookmarkletPayload.toString();
+    let funcString = bookmarkletPayload.toString();
     const bodyStart = funcString.indexOf('{') + 1;
     const bodyEnd = funcString.lastIndexOf('}');
-    const bodyCode = funcString.substring(bodyStart, bodyEnd);
+    let bodyCode = funcString.substring(bodyStart, bodyEnd);
 
-    // Wrap in an IIFE and execute
-    const executableCode = '(async () => {' + bodyCode + '})();';
+    bodyCode = bodyCode.replace(/\s+/g, ' ');
 
-    // Directly URL encode without naive regex minification to preserve standard syntax integrity
+    const executableCode = '(async function(){' + bodyCode + '})();';
     const finalCode = 'javascript:' + encodeURIComponent(executableCode);
     const instructions = "Drag this link to your bookmarks bar. When on a ServiceNow list, click it to open the Queue Interceptor modal. Set your keywords, check 'Active Monitoring', and it will continually check for matching unassigned tickets and claim them for you.";
 
