@@ -17,19 +17,23 @@ This architecture enables field discovery and validation against live ServiceNow
 ### File Structure
 
 ```
-├── ticket_template.html     # Main hub with simple tools (Template, Deferred Updater)
-├── ticket_automation.html   # Universal Automation Builder (complex)
-├── data_extractor.html      # CSV Data Extractor Builder (complex)
+├── index.html               # Main single-page application entry point
+└── js/
+    └── generators/          # Modular builder scripts for each tool
+        ├── template.js      # Ticket Template Builder
+        ├── updater.js       # Deferred Bulk Updater
+        ├── automation.js    # Universal Automation Builder
+        ├── extractor.js     # CSV Data Extractor
+        └── interceptor.js   # Interceptor tool
 ```
 
 **Design Philosophy:**
-- Simple, frequently-used tools are consolidated in `ticket_template.html` for quick access
-- Complex tools with extensive UI requirements are separated into dedicated pages
-- Each page can function independently as a bookmarkable entry point
+- All tools are consolidated into a single unified interface (`index.html`)
+- Logic is decoupled and loaded conditionally from `js/generators/*.js`
 
 ## Application Components
 
-### 1. Main Hub (`ticket_template.html`)
+### 1. Main Hub (`index.html`)
 
 Central entry point providing quick access to frequently-used tools and navigation to specialized builders.
 
@@ -69,12 +73,11 @@ Schedules delayed bulk comment updates for checked tickets from list views.
 - Requires browser window to remain open (tab can close)
 
 **Navigation:**
-- Links to `ticket_automation.html` (Universal Automation Builder)
-- Links to `data_extractor.html` (CSV Data Extractor)
+- Handled via dynamic single-page routing in `index.html`
 
-### 2. Universal Automation Builder (`ticket_automation.html`)
+### 2. Universal Automation Builder (`js/generators/automation.js`)
 
-Advanced rule-based ticket modification system supporting conditional logic and batch processing. Separated into dedicated page due to complexity.
+Advanced rule-based ticket modification system supporting conditional logic and batch processing.
 
 **Page Interface:**
 - Single-step generation: directly produces the builder bookmarklet
@@ -102,9 +105,9 @@ Advanced rule-based ticket modification system supporting conditional logic and 
 - Optional prompted values applied to all matching tickets
 - Automatic page reload on completion
 
-### 3. CSV Data Extractor (`data_extractor.html`)
+### 3. CSV Data Extractor (`js/generators/extractor.js`)
 
-Sophisticated data extraction tool for generating CSV exports from ServiceNow list views. Separated into dedicated page due to multi-step builder complexity.
+Sophisticated data extraction tool for generating CSV exports from ServiceNow list views.
 
 **Page Interface:**
 - Single-step generation: directly produces the extractor builder bookmarklet
@@ -265,7 +268,7 @@ const cfg = ${JSON.stringify(userConfig)};
 ### Typical Workflow: Template Builder
 
 1. **Configuration Phase**
-   - Navigate to `ticket_template.html`
+   - Navigate to `index.html`
    - Select "Ticket Template" tool
    - Configure two-click mode if desired
    - Specify bookmarklet name
@@ -286,7 +289,7 @@ const cfg = ${JSON.stringify(userConfig)};
 ### Typical Workflow: Automation Builder
 
 1. **Configuration Phase**
-   - Navigate to `ticket_automation.html`
+   - Navigate to `index.html`
    - Click "Generate Automation Builder"
    - Drag generated builder link to bookmarks
 
@@ -314,7 +317,7 @@ const cfg = ${JSON.stringify(userConfig)};
 ### Typical Workflow: Data Extractor
 
 1. **Configuration Phase**
-   - Navigate to `data_extractor.html`
+   - Navigate to `index.html`
    - Click "Generate Extractor Builder"
    - Drag generated builder link to bookmarks
 
