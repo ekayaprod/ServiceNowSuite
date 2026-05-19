@@ -1,3 +1,7 @@
-**Learning:** A naked repository without CI/CD workflows or basic meta-infrastructure (e.g., CODEOWNERS, issue/PR templates) is an exposed supply line. Implementing fundamental deployment automation directly using standard GitHub action workflows (`actions/checkout`, `actions/configure-pages`, `actions/upload-pages-artifact`, `actions/deploy-pages`) establishes secure and fast code delivery.
+# Dispatch Journal
 
-**Action:** Bootstrapped net-new CI/CD pipeline (`.github/workflows/pages.yml`) for the static site along with standard meta-infrastructure (`.github/CODEOWNERS`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/ISSUE_TEMPLATE/bug_report.md`) to establish proper baseline repository controls.
+## Environment State Shifts
+
+- Injected strict permissions lock (`permissions: contents: read`) to `.github/workflows/test.yml` to resolve Pipeline Vulnerability.
+- Injected caching mechanisms (`cache: 'npm'`) to the `actions/setup-node@v6` step in `.github/workflows/test.yml` to resolve Transit Bloat.
+- Corrected indentation issues in `.github/workflows/test.yml`.
