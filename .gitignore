@@ -1,6 +1,6 @@
+.DS_Store
+.idea/
+.vscode/
 app_extracted.js
 jest.config.js
 node_modules/
-.DS_Store
-.vscode/
-.idea/
