@@ -9,8 +9,8 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .step { display: none; }
-        .step.active { display: block; animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .step.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-slate-100">
@@ -18,244 +18,126 @@
         <div class="container w-full max-w-4xl mx-auto">
             <header class="text-center mb-8">
                 <h1 class="text-4xl font-bold text-slate-800">ServiceNow Bookmarklet Suite</h1>
-                <p class="text-slate-600 mt-2">Build powerful bookmarklets to streamline your ServiceNow workflow.</p>
+                <p class="text-slate-600 mt-2">Generate secure, environment-aware Builder bookmarklets for your ServiceNow workflow.</p>
             </header>
 
-            <main id="app-container" class="bg-white p-8 rounded-2xl shadow-lg">
-                <!-- Step 1: Tool Selection -->
-                <div id="step1" class="step active">
-                    <h2 class="text-2xl font-semibold text-slate-800 mb-6">Choose a Tool</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Card 1: Ticket Template (Inline) -->
-                        <button id="btn-template" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 active:border-blue-500 hover:bg-blue-50 active:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
-                            <h3 class="font-semibold text-lg text-slate-800">Ticket Template</h3>
-                            <p class="text-slate-500 mt-2 text-sm">Fill new tickets instantly</p>
-                        </button>
-                        <!-- Card 2: Deferred Updater (Inline) -->
-                        <button id="btn-updater" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 active:border-blue-500 hover:bg-blue-50 active:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
-                            <h3 class="font-semibold text-lg text-slate-800">Deferred Bulk Updater</h3>
-                            <p class="text-slate-500 mt-2 text-sm">Schedule bulk comments</p>
-                        </button>
-                        <!-- Card 3: Universal Automation (Inline) -->
-                        <button id="btn-automation" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 active:border-blue-500 hover:bg-blue-50 active:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
-                            <h3 class="font-semibold text-lg text-slate-800">Universal Automation</h3>
-                            <p class="text-slate-500 mt-2 text-sm">Complex, rule-based logic</p>
-                        </button>
-                        <!-- Card 4: Data Extractor (Inline) -->
-                        <button id="btn-extractor" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 active:border-blue-500 hover:bg-blue-50 active:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
-                            <h3 class="font-semibold text-lg text-slate-800">CSV Data Extractor</h3>
-                            <p class="text-slate-500 mt-2 text-sm">Export list data to CSV</p>
-                        </button>
+            <main id="app-container" class="bg-white p-8 rounded-2xl shadow-xl">
+                <div id="step-1" class="step active">
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 text-center">Select a Tool to Build</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <div class="border rounded-xl p-6 hover:shadow-md cursor-pointer transition flex flex-col h-full bg-white border-slate-200 hover:border-blue-400 tool-card" data-tool="automation">
+                            <h3 class="text-lg font-bold text-slate-800">CWOPA List Automation</h3>
+                            <p class="text-sm text-slate-600 mt-2 flex-grow">Generates a Builder that scrapes your User ID and creates the CWOPA/Transfer/Offboard multi-ticket updater.</p>
+                            <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 w-full pointer-events-none">Configure</button>
+                        </div>
 
-                        <!-- Card 5: Interceptor -->
-                        <button id="btn-interceptor" class="group text-center p-6 border-2 rounded-lg hover:border-blue-500 active:border-blue-500 hover:bg-blue-50 active:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">
-                            <h3 class="font-semibold text-lg text-slate-800">Queue Interceptor</h3>
-                            <p class="text-slate-500 mt-2 text-sm">Monitor queue and auto-assign</p>
-                        </button>
+                        <div class="border rounded-xl p-6 hover:shadow-md cursor-pointer transition flex flex-col h-full bg-white border-slate-200 hover:border-blue-400 tool-card" data-tool="interceptor">
+                            <h3 class="text-lg font-bold text-slate-800">Queue Interceptor</h3>
+                            <p class="text-sm text-slate-600 mt-2 flex-grow">Generates a Builder for the sticky queue interceptor. Captures your User ID for automatic ticket claiming.</p>
+                            <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 w-full pointer-events-none">Configure</button>
+                        </div>
+
+                        <div class="border rounded-xl p-6 hover:shadow-md cursor-pointer transition flex flex-col h-full bg-white border-slate-200 hover:border-blue-400 tool-card" data-tool="template">
+                            <h3 class="text-lg font-bold text-slate-800">Form Template</h3>
+                            <p class="text-sm text-slate-600 mt-2 flex-grow">Generates a Builder that scrapes any active ServiceNow form to create a permanent, 1-click auto-fill template.</p>
+                            <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 w-full pointer-events-none">Configure</button>
+                        </div>
+
+                        <div class="border rounded-xl p-6 hover:shadow-md cursor-pointer transition flex flex-col h-full bg-white border-slate-200 hover:border-blue-400 tool-card" data-tool="extractor">
+                            <h3 class="text-lg font-bold text-slate-800">Onboarding Extractor</h3>
+                            <p class="text-sm text-slate-600 mt-2 flex-grow">Generates the Onboarding CSV Extractor. Securely packages the logic to scrape variable payloads via hidden iframes.</p>
+                            <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 w-full pointer-events-none">Configure</button>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Step 2a: Configure Ticket Template -->
-                <div id="step2-template" class="step">
-                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Configure: Ticket Template Builder</h2>
-                    <div class="space-y-6">
-                        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
-                            Create a builder tool. Run the generated builder on a ServiceNow form, select fields to construct your template, and generate the final bookmarklet.
+                <div id="step-2" class="step">
+                    <button class="text-sm text-blue-600 hover:underline mb-4 flex items-center" onclick="app.goToStep(1)">← Back to tools</button>
+                    <h2 id="config-title" class="text-2xl font-semibold text-slate-800 mb-6">Configure Tool</h2>
+                    
+                    <div id="config-forms" class="max-w-md mx-auto">
+                        <div id="form-automation" class="hidden">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Bookmarklet Name</label>
+                            <input type="text" id="bookmarkletName-automation" value="CWOPA Builder" class="w-full p-2 border rounded-md mb-4">
+                            <button onclick="generateAutomation(app)" class="w-full px-4 py-2 bg-green-600 text-white rounded font-medium hover:bg-green-700">Generate Builder</button>
                         </div>
-                        <div>
-                            <h4 class="text-md font-semibold text-slate-800 mb-3">Options</h4>
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" id="two_click" class="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none cursor-pointer">
-                                <span class="ml-2 text-sm text-slate-600">Two-click mode (opens new record form first)</span>
-                            </label>
+
+                        <div id="form-interceptor" class="hidden">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Bookmarklet Name</label>
+                            <input type="text" id="bookmarkletName-interceptor" value="Interceptor Builder" class="w-full p-2 border rounded-md mb-4">
+                            <button onclick="generateInterceptor(app)" class="w-full px-4 py-2 bg-green-600 text-white rounded font-medium hover:bg-green-700">Generate Builder</button>
                         </div>
-                        <div>
-                            <label for="bookmarkletName-template" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
-                            <input type="text" id="bookmarkletName-template" value="Ticket Template" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200">
+
+                        <div id="form-template" class="hidden">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Bookmarklet Name</label>
+                            <input type="text" id="bookmarkletName-template" value="Template Builder" class="w-full p-2 border rounded-md mb-4">
+                            <button onclick="generateTemplate(app)" class="w-full px-4 py-2 bg-green-600 text-white rounded font-medium hover:bg-green-700">Generate Builder</button>
                         </div>
-                    </div>
-                    <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-template" class="px-6 py-2 min-h-[44px] border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
-                        <button id="generateBtn-template" class="px-6 py-2 min-h-[44px] border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Template Bookmarklet</button>
+
+                        <div id="form-extractor" class="hidden">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Bookmarklet Name</label>
+                            <input type="text" id="bookmarkletName-extractor" value="Extractor Builder" class="w-full p-2 border rounded-md mb-4">
+                            <button onclick="generateExtractor(app)" class="w-full px-4 py-2 bg-green-600 text-white rounded font-medium hover:bg-green-700">Generate Builder</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Step 2b: Configure Deferred Updater -->
-                <div id="step2-updater" class="step">
-                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Configure: Deferred Bulk Updater</h2>
-                    <div class="space-y-6">
-                        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
-                            Create a bookmarklet to schedule bulk updates from a list view. Run the generated tool on a list, select tickets, and schedule your comment.
+                <div id="step-3" class="step">
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 text-center">Your Builder is Ready</h2>
+                    <div id="result-container" class="max-w-2xl mx-auto bg-slate-50 p-6 rounded-lg border">
                         </div>
-                        <div>
-                            <label for="commentField" class="block text-sm font-medium text-slate-700">Target Comment Field</label>
-                            <select id="commentField" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 focus-visible:outline-none transition-all duration-200 cursor-pointer">
-                                <option value="work_notes" selected>Work Notes (Internal)</option>
-                                <option value="comments">Additional Comments (Customer Visible)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="bookmarkletName-updater" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
-                            <input type="text" id="bookmarkletName-updater" value="Deferred Updater" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200">
-                        </div>
-                    </div>
-                    <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-updater" class="px-6 py-2 min-h-[44px] border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
-                        <button id="generateBtn-updater" class="px-6 py-2 min-h-[44px] border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Updater Bookmarklet</button>
-                    </div>
                 </div>
-
-                <!-- Step 2c: Configure Universal Automation -->
-                <div id="step2-automation" class="step">
-                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Configure: Universal Automation Builder</h2>
-                    <div class="space-y-6">
-                        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
-                            Generate the <strong>Builder Bookmarklet</strong> and drag it to your bookmarks bar. On any ServiceNow form, click the bookmarklet to launch the rule engine and construct custom automation tools.
-                        </div>
-                        <div>
-                            <label for="bookmarkletName-automation" class="block text-sm font-medium text-slate-700">Builder Bookmarklet Name</label>
-                            <input type="text" id="bookmarkletName-automation" value="Automation Builder" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200">
-                        </div>
-                    </div>
-                    <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-automation" class="px-6 py-2 min-h-[44px] border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
-                        <button id="generateBtn-automation" class="px-6 py-2 min-h-[44px] border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Automation Bookmarklet</button>
-                    </div>
-                </div>
-
-                <!-- Step 2d: Configure Data Extractor -->
-                <div id="step2-extractor" class="step">
-                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Configure: Data Extractor Builder</h2>
-                    <div class="space-y-6">
-                        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
-                            Generate the <strong>Extractor Builder</strong> bookmarklet. Run it on a ServiceNow form to select fields and output your custom data extractor tool.
-                        </div>
-                    </div>
-                    <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-extractor" class="px-6 py-2 min-h-[44px] border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
-                        <button id="generateBtn-extractor" class="px-6 py-2 min-h-[44px] border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Extractor Bookmarklet</button>
-                    </div>
-                </div>
-
-
-                <!-- Step 2e: Configure Interceptor -->
-                <div id="step2-interceptor" class="step">
-                    <h2 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Configure: Queue Interceptor</h2>
-                    <div class="space-y-6">
-                        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm">
-                            Generate the <strong>Queue Interceptor</strong> bookmarklet. Run it on a ServiceNow list to persistently monitor the queue and claim tickets.
-                        </div>
-                        <div>
-                            <label for="bookmarkletName-interceptor" class="block text-sm font-medium text-slate-700">Bookmarklet Name</label>
-                            <input type="text" id="bookmarkletName-interceptor" value="Queue Interceptor" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200">
-                        </div>
-                    </div>
-                    <div class="mt-8 flex justify-between items-center">
-                        <button id="backBtn-interceptor" class="px-6 py-2 min-h-[44px] border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Back</button>
-                        <button id="generateBtn-interceptor" class="px-6 py-2 min-h-[44px] border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">Generate Interceptor Bookmarklet</button>
-                    </div>
-                </div>
-
-                <!-- Step 3: Result Page (Generic) -->
-                <div id="step3-result" class="step"></div>
             </main>
         </div>
     </div>
 
-<script src="js/generators/template.js"></script>
-<script src="js/generators/updater.js"></script>
-<script src="js/generators/automation.js"></script>
-<script src="js/generators/extractor.js"></script>
-<script src="js/generators/interceptor.js"></script>
-<script>
-const app = {
-    init() {
-        // Tool selection
-        document.getElementById('btn-template').addEventListener('click', () => this.showStep('2-template'));
-        document.getElementById('btn-updater').addEventListener('click', () => this.showStep('2-updater'));
-        document.getElementById('btn-automation').addEventListener('click', () => this.showStep('2-automation'));
-        document.getElementById('btn-extractor').addEventListener('click', () => this.showStep('2-extractor'));
-        document.getElementById('btn-interceptor').addEventListener('click', () => this.showStep('2-interceptor'));
+    <script src="js/generators/automation.js"></script>
+    <script src="js/generators/interceptor.js"></script>
+    <script src="js/generators/template.js"></script>
+    <script src="js/generators/extractor.js"></script>
 
-        
-        // Template config
-        document.getElementById('backBtn-template').addEventListener('click', () => this.showStep(1));
-        document.getElementById('generateBtn-template').addEventListener('click', () => generateTemplate(this));
+    <script>
+        const app = {
+            currentTool: null,
+            goToStep(stepNum) {
+                document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+                document.getElementById('step-' + stepNum).classList.add('active');
+            },
+            selectTool(toolId, toolName) {
+                this.currentTool = toolId;
+                document.getElementById('config-title').textContent = 'Configure ' + toolName;
+                document.querySelectorAll('[id^="form-"]').forEach(el => el.classList.add('hidden'));
+                document.getElementById('form-' + toolId).classList.remove('hidden');
+                this.goToStep(2);
+            },
+            showResult(code, name, title, instructions) {
+                const container = document.getElementById('result-container');
+                container.innerHTML = `
+                    <div class="text-center">
+                        <p class="font-medium text-slate-600 mb-4">Drag this link to your bookmarks bar:</p>
+                        <a id="bookmarklet-link" href="${code}" onclick="event.preventDefault()" class="inline-block px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">${name}</a>
+                    </div>
+                    <div class="mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md text-sm">
+                        ${instructions}
+                    </div>
+                    <div class="mt-6 text-center">
+                        <button onclick="app.goToStep(1)" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-600 hover:bg-slate-700 transition-colors duration-200">Create Another Tool</button>
+                    </div>
+                `;
+                this.goToStep(3);
+            }
+        };
 
-        // Updater config
-        document.getElementById('backBtn-updater').addEventListener('click', () => this.showStep(1));
-        document.getElementById('generateBtn-updater').addEventListener('click', () => generateUpdater(this));
-
-        // Automation config
-        document.getElementById('backBtn-automation').addEventListener('click', () => this.showStep(1));
-        document.getElementById('generateBtn-automation').addEventListener('click', () => generateAutomation(this));
-
-        // Extractor config
-        document.getElementById('backBtn-extractor').addEventListener('click', () => this.showStep(1));
-        document.getElementById('generateBtn-extractor').addEventListener('click', () => generateExtractor(this));
-
-        // Interceptor config
-        document.getElementById('backBtn-interceptor').addEventListener('click', () => this.showStep(1));
-        document.getElementById('generateBtn-interceptor').addEventListener('click', () => { if(typeof generateInterceptor === 'function') generateInterceptor(this); });
-    },
-    
-    showStep(n) {
-        // [SECURITY BOUNDARY] Enforce strict input validation to prevent invalid DOM queries
-        if (n === null || n === undefined || n === '') return;
-
-        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        const stepStr = String(n);
-        const stepId = (typeof n === 'number' || !stepStr.startsWith('step')) ? 'step' + stepStr : stepStr;
-        const el = document.getElementById(stepId);
-
-        // [SECURITY BOUNDARY] Strict null check before class mutation
-        if (el && el.classList) {
-            el.classList.add('active');
-        } else {
-            console.warn(`[showStep] Invalid target: ${stepId}`);
-        }
-    },
-
-    // Render result page
-    showResult(code, name, title, instructions) {
-        // [SECURITY BOUNDARY] Strict null check on mandatory parameters
-        if (code === null || code === undefined || code === '' || name === null || name === undefined || name === '') return console.warn('[showResult] Missing required parameters');
-
-        const container = document.getElementById('step3-result');
-        if (container === null || container === undefined) return console.warn('[showResult] Container not found');
-
-        container.innerHTML = `
-            <h2 class="text-2xl font-semibold mb-4 text-center text-slate-700">${title}</h2>
-            <div class="bg-slate-100 p-6 rounded-lg text-center">
-                <p class="font-medium text-slate-600">Drag this link to your bookmarks bar:</p>
-                <div class="my-4 flex justify-center">
-                    <a id="bookmarklet-link" href="#" onclick="event.preventDefault()" class="px-8 py-3 min-h-[44px] bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 active:bg-blue-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none">${name}</a>
-                </div>
-            </div>
-            <div class="mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md">
-                ${instructions}
-            </div>
-            <div class="mt-6 text-center">
-                <button id="startOverBtn" class="px-6 py-2 min-h-[44px] border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-600 hover:bg-slate-700 active:bg-slate-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">Create Another Bookmarklet</button>
-            </div>`;
-        
-        const link = document.getElementById('bookmarklet-link');
-        if (link) {
-            link.href = code;
-        }
-        
-        const resetBtn = document.getElementById('startOverBtn');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => this.showStep(1));
-        }
-
-        this.showStep('3-result');
-    }
-};
-
-app.init();
-</script>
+        // Bind clicks to tool cards
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const toolId = card.getAttribute('data-tool');
+                const toolName = card.querySelector('h3').textContent;
+                app.selectTool(toolId, toolName);
+            });
+        });
+    </script>
 </body>
 </html>
-
-
