@@ -54,7 +54,7 @@ const generateUpdater = (app) => {
 
             const modalHTML = \`
                 <div id="\${modalId}" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;">
-                    <div style="width:90%;max-width:800px;background:#fff;color:#000;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);display:flex;flex-direction:column;max-height:90vh;">
+                    <div style="width:100%;max-width:800px;background:#fff;color:#000;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);display:flex;flex-direction:column;max-height:90vh;">
                         <h3 style="margin:0;padding:20px;background:#0066cc;color:#fff;border-radius:12px 12px 0 0;">Deferred Bulk Updater</h3>
                         <div style="padding:20px;overflow-y:auto;flex-grow:1;">
                             <div style="font-size: 0.9em; margin-bottom: 15px;">
@@ -81,8 +81,8 @@ const generateUpdater = (app) => {
                             </div>
                         </div>
                         <div id="\${modalId}-footer" style="padding:20px;border-top:1px solid #ccc;display:flex;justify-content:flex-end;gap:10px;">
-                            <button id="\${modalId}-cancel" style="padding:8px 16px;">Cancel</button>
-                            <button id="\${modalId}-schedule" style="padding:8px 16px;background:#0066cc;color:#fff;border:none;border-radius:4px;">Schedule Update</button>
+                            <button id="\${modalId}-cancel" style="padding:12px 16px;min-height:44px;">Cancel</button>
+                            <button id="\${modalId}-schedule" style="padding:12px 16px;min-height:44px;background:#0066cc;color:#fff;border:none;border-radius:4px;">Schedule Update</button>
                         </div>
                     </div>
                 </div>
