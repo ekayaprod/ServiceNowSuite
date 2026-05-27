@@ -4,3 +4,6 @@
 app_extracted.js
 jest.config.js
 node_modules/
+__pycache__
+*.swp
+*.swo
