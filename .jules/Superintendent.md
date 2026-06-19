@@ -6,5 +6,5 @@
 ## Persistent Entropy
 * None
 
-## Escalation History
+## Hazard Log
 * `package-lock.json` mismatch against `package.json`
