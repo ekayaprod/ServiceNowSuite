@@ -1,131 +1,33 @@
-# ⚡ ServiceNow Bookmarklet Suite
+# ⚡ ServiceNow Bookmarklet Suite: Personal Workflow Optimizer
 
-[![build: passing](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/project)
+**A strictly localized, zero-dependency client-side utility built to automate my personal ServiceNow tasks directly from the browser.**
 
-A zero-dependency client-side application for generating ServiceNow automation
-bookmarklets. The system employs a meta-builder architecture where static HTML
-pages generate builder bookmarklets, which in turn produce task-specific,
-self-contained automation tools.
+## The Operational Bottleneck
+This tool was created solely to optimize my individual daily workflow and eliminate manual data entry bottlenecks. Working in ServiceNow previously required heavy manual processing, slow multi-ticket updates across various queues, and repetitive keystrokes that presented high risks for data entry errors. I built these bookmarklets to reclaim hours of my own time, ensure my personal updates are perfectly standardized, and drastically reduce my time-to-resolution—all without relying on complex backends or enterprise-level deployments.
 
-## Architecture Overview
+## Tech Stack & Architecture
+- **JavaScript (ES6+)**: Core automation logic and DOM manipulation.
+- **HTML/Tailwind CSS**: A static, local configuration hub (`index.html`).
+- **ServiceNow Client-Side Context**: Utilizes native DOM structures (`g_form`, `gsft_main`).
+- **Browser Bookmarklets**: Execution via standard browser bookmark URIs.
+- **Zero Server Architecture**: Entirely localized client-side execution; no external APIs, databases, or tracking.
 
-### Core Pattern: Meta-Builder Architecture
+## Key Features & Workflow
 
-The application follows a three-tier generation model:
-
-1. **Configuration UI** (Static HTML) - User defines tool parameters.
-2. **Builder Bookmarklet** (Generated JavaScript) - Interactive field selection
-   interface injected into ServiceNow.
-3. **Final Bookmarklet** (Generated JavaScript) - Task-specific automation tool.
-
-This architecture enables field discovery and validation against live ServiceNow
-instances while maintaining zero server dependencies.
-
-### Application Hub
-
-The main hub `index.html` offers direct access to generating specialized tools:
+The system uses a "meta-builder" concept: I open my local `index.html` hub to configure a builder bookmarklet. I run that builder once in ServiceNow to capture my personal context (like my User ID), which then outputs the final, highly specific automation tool I save to my bookmarks bar.
 
 - **CWOPA List Automation**
+  - *Workflow:* Generates a tool to bulk assign, rename, and close onboarding, transfer, and offboarding tickets directly from a list view.
+  - *Function:* Intelligently formats ticket titles based on extracted variables and prevents me from needing to click into each ticket to update them.
 - **Queue Interceptor**
+  - *Workflow:* Actively monitors list views and automatically claims unassigned incoming tickets matching targeted keywords (e.g., "VPN").
+  - *Function:* Eliminates manual refresh-and-click loops by instantly assigning relevant work to my scraped User ID.
 - **Form Template**
+  - *Workflow:* Scrapes my currently populated active form and turns it into a one-click auto-fill template.
+  - *Function:* Allows me to instantly reproduce complex, perfectly populated forms without risking human error during repetitive manual entries.
 - **Onboarding Extractor**
+  - *Workflow:* Silently extracts hidden variable payloads (e.g., CWOPA IDs) from "onboard" list views using background iframes.
+  - *Function:* Generates a client-side CSV download of ticket data for my local reporting workflows, bypassing the need for heavy API pulls.
 
-## Integrated Tools
-
-### CWOPA List Automation
-
-Generates a Builder that scrapes your User ID and creates the CWOPA/Transfer/
-Offboard multi-ticket updater.
-
-**Benefits & Use Cases:**
-- **Mass Processing:** Provides a unified interface to bulk assign, rename, and close onboarding, offboarding, and transfer tickets directly from a list view.
-- **Intelligent Formatting:** Automatically analyzes ticket variables (dates, job titles, CWOPA IDs) to intelligently format and standardize ticket titles (e.g., appending `- TRANSFER` or `- No AD`).
-- **Execution Safeguards:** Runs pre-flight checks on the queue to determine workable status before applying bulk updates to the targeted ServiceNow instances.
-
-### Queue Interceptor
-
-Generates a Builder for the sticky queue interceptor. Captures your User ID for
-automatic ticket claiming.
-
-**Benefits & Use Cases:**
-- **Active Monitoring:** Continuously scans a ServiceNow list view at a user-defined interval to identify incoming unassigned tickets.
-- **Targeted Acquisition:** Automatically claims tickets matching specific keywords (e.g., "Distribution Lists", "VPN") and assigns them directly to the scraped User ID.
-- **State Management:** Implements a localized skip cache, allowing the user to ignore specific tickets without triggering repeated interception attempts.
-
-### Form Template
-
-Generates a Builder that scrapes any active ServiceNow form to create a permanent,
-one-click auto-fill template featuring dynamic caller resolution.
-
-**Benefits & Use Cases:**
-- **State Replication:** Converts a fully populated ServiceNow form into a localized, static bookmarklet capable of instantly recreating that exact form state.
-- **Privacy-Safe Execution:** Generates the automated template strictly within the browser, avoiding the need to hardcode sensitive GUIDs or payloads in the source repository.
-- **Runtime Resolution:** Actively intercepts 'caller' inputs to prompt the user dynamically at runtime, ensuring templates remain reusable across different employee contexts.
-
-### Onboarding Extractor
-
-Generates the Onboarding CSV Extractor. Securely packages the logic to scrape
-variable payloads via hidden iframes.
-
-**Benefits & Use Cases:**
-- **Deep Extraction:** Scans a list view for "onboard" tickets and utilizes hidden iframes to extract embedded variable data (CWOPA ID, First Name, Last Name) that is otherwise inaccessible from the surface list.
-- **Local Packaging:** Aggregates the extracted payloads entirely client-side and generates a dynamically downloadable CSV file for reporting workflows.
-- **Non-blocking Operations:** Parses ticket data in the background via hidden execution contexts, preserving the user's current list view without forced navigation.
-
-## Technical Implementation
-
-### Environment Detection System
-
-Critical function for locating ServiceNow's execution context across shadow DOM
-and iframe boundaries.
-
-```javascript
-findEnv(window) → {
-  type: 'form' | 'list',
-  context: { win: Window, g_form?: Object, listEl?: Element }
-}
-```
-
-**Detection Algorithm:**
-
-1. Recursively search for `#gsft_main` iframe through shadow DOM.
-2. Check iframe content window for `g_form` object (form context).
-3. Check for `.list_table` or `[data-list_id]` elements (list context).
-4. Fall back to direct window context if iframe not found.
-
-**Handles:**
-
-- Shadow DOM encapsulation in modern ServiceNow instances.
-- Cross-origin frame restrictions (graceful degradation).
-- Multiple possible frame naming conventions.
-
-### Code Generation Techniques
-
-#### Minification Strategy
-
-Applied to final bookmarklets to reduce size and avoid browser URL length limits.
-
-**Transformations:**
-
-1. Remove block comments (`/* */`).
-2. Remove line comments (`//`).
-3. Collapse whitespace around operators.
-4. Remove unnecessary semicolons before closing braces.
-5. URL-encode result with `encodeURIComponent()`.
-
-**Preservation:**
-
-- String literals remain intact.
-- Functional code structure maintained.
-- Variable names not obfuscated (readability for debugging).
-
-### Security Considerations
-
-- **Client-Side Only:** No server communication required. All code generation
-  happens in browser. No data persistence or external requests.
-- **ServiceNow Integration:** Relies on ServiceNow's existing authentication.
-  Executes within user's current session context. Subject to ServiceNow's
-  role-based access controls.
-- **Code Injection:** Generated bookmarklets execute with page privileges.
-  Users should review generated code before use. No remote code execution or
-  dynamic eval patterns.
+## Localized Impact
+This toolset has been a game changer for my individual productivity. By converting repetitive manual clicking into single-click bookmarklets, I have practically eliminated manual data entry errors from my workflow, dramatically reduced the time I spend syncing tickets, and removed the operational drag of standard UI navigation. **Note:** This is a personalized workflow optimization script, not an officially approved, team-wide, or enterprise deployment. All executions are strictly local to my browser session and utilize my existing authenticated access level.
