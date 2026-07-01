@@ -1,5 +1,21 @@
 # ⚡ ServiceNow Meta-Builder Bookmarklet Suite
 
+## 🚀 Quick Start
+Welcome aboard! To boot the application locally and start generating tools:
+1. `npm ci` (Install testing dependencies).
+2. `npx jest --passWithNoTests` (Verify the build environment).
+3. Open `index.html` directly in your browser.
+
+## 🛠️ Features & Workflow Optimization
+This suite is built on four core, independently engineered generators located in `js/generators/`. Each is designed to surgically eliminate specific administrative bottlenecks.
+
+| Tool | Benefit | Use Case |
+| :--- | :--- | :--- |
+| **CWOPA List Automation** | Condenses 15 minutes of manual bulk ticket updates into a 5-second asynchronous headless operation. | Scrapes your User ID to generate a multi-ticket processor that intercepts list views, processes payloads in hidden iframes, and performs bulk assignment, renaming, and closures. |
+| **Queue Interceptor** | Eliminates manual refresh latency and cognitive fatigue when monitoring unassigned queues. | Injects sticky UI hooks into list views, allowing for single-click ticket claiming and localized skip-caching via `localStorage`. |
+| **Form Template** | Converts transient form states into permanent, single-click boot scripts without hardcoding sensitive GUIDs. | Scrapes an active ServiceNow form (like a Request Item) and generates a payload that instantly rebuilds the form's state, featuring dynamic caller resolution. |
+| **Onboarding Extractor** | Eradicates manual data entry errors and multi-click navigation when building employee onboarding matrices. | Bypasses surface UI to parse variable payloads through hidden `sysparm_nostack` iframes and packages the structural data directly into a downloadable CSV. |
+
 ## 1. Overview
 The **ServiceNow Meta-Builder Bookmarklet Suite** is a zero-dependency, client-side application designed to dynamically generate environment-aware automation tools for ServiceNow.
 
