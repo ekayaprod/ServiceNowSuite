@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Features
+- ✅ New: Queue Interceptor for monitoring and claiming unassigned tickets automatically.
+- ✅ New: Extract onboarding tickets specifically via CSV Extractor builder.
+- ✅ Update: Fluid visual UI across elements, improved touch targets, and better semantic boundaries.
+- ✅ Update: Dynamic caller resolution support on Template builder.
+
+### Chores
+- 🔧 Chore: Unified page builders into a streamlined SPA setup.
+- 🔧 Chore: Upgraded testing suites to Jest 30, robust strict checks, and GitHub actions configuration.
+- 🔧 Chore: Bootstrapped CI/CD code quality metrics pipelines.
+
 ## [0.1.0] - 2026-02-11
 
 ### Features
