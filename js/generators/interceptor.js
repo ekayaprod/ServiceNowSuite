@@ -1,3 +1,10 @@
+/**
+ * Generates the Queue Interceptor bookmarklet.
+ *
+ * AST Reasoning: Injects a floating UI monitor onto ServiceNow list views. It parses DOM rows
+ * to find unassigned tickets, evaluates them against keyword filters, and automates assignment via hidden iframes.
+ * Business Intent: Introduced (c1ad6aa) to provide real-time, automated queue management, drastically reducing manual refresh and claim times.
+ */
 const generateInterceptor = (app) => {
     const nameEl = document.getElementById('bookmarkletName-interceptor');
     const name = nameEl ? nameEl.value.trim() || 'Interceptor Builder' : 'Interceptor Builder';

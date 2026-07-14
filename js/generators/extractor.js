@@ -1,3 +1,10 @@
+/**
+ * Generates the Onboarding CSV Extractor bookmarklet.
+ *
+ * AST Reasoning: Queries ServiceNow list views using hidden iframes and deep DOM parsing
+ * to recursively build a CSV of ticket data from specific structural nodes.
+ * Business Intent: Enhanced to support onboarding CSV functionality (c029c94), enabling bulk exports of new hire data directly from the system.
+ */
 const generateExtractor = (app) => {
     const nameEl = document.getElementById('bookmarkletName-extractor');
     const name = nameEl ? nameEl.value.trim() || 'Extractor Builder' : 'Extractor Builder';
