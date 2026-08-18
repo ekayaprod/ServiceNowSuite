@@ -1,3 +1,9 @@
+/**
+ * Generates the CWOPA List Automation bookmarklet.
+ *
+ * AST Reasoning: Generates the CWOPA Process Queue bookmarklet that intercepts list views, processes payloads in hidden iframes, and performs bulk actions.
+ * Business Intent: Introduced in commit 1930745 to separate bookmarklet generation logic from HTML and condense manual bulk ticket updates.
+ */
 const generateAutomation = (app) => {
     const nameEl = document.getElementById('bookmarkletName-automation');
     const name = nameEl ? nameEl.value.trim() || 'CWOPA Builder' : 'CWOPA Builder';

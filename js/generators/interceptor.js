@@ -3,7 +3,7 @@
  *
  * AST Reasoning: Injects a floating UI monitor onto ServiceNow list views. It parses DOM rows
  * to find unassigned tickets, evaluates them against keyword filters, and automates assignment via hidden iframes.
- * Business Intent: Introduced (c1ad6aa) to provide real-time, automated queue management, drastically reducing manual refresh and claim times.
+ * Business Intent: Introduced in commit 0313453 to provide proactive queue monitoring and automated ticket claiming.
  */
 const generateInterceptor = (app) => {
     const nameEl = document.getElementById('bookmarkletName-interceptor');
