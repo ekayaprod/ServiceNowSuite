@@ -1,3 +1,9 @@
+/**
+ * Generates the Template Builder bookmarklet.
+ *
+ * AST Reasoning: Generates a static form filler payload by scraping the active ServiceNow g_form context.
+ * Business Intent: Introduced in commit 1930745 to separate bookmarklet generation logic from HTML.
+ */
 const generateTemplate = (app) => {
     const nameEl = document.getElementById('bookmarkletName-template');
     const name = nameEl ? nameEl.value.trim() || 'Template Builder' : 'Template Builder';
