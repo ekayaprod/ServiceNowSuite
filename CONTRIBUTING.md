@@ -17,8 +17,7 @@ This project is a **single-page application** (`index.html`) using modular JavaS
     *   Use `encodeURIComponent` for the final output.
 
 ## Testing
-1.  Run local unit tests via `npx jest --passWithNoTests`.
-2.  Make changes to the HTML/JS (`index.html` and `js/generators/*.js`).
-3.  Refresh the local file in your browser.
-4.  Generate the bookmarklet.
-5.  Test against a live ServiceNow instance or mock.
+1.  Make changes to the HTML/JS (`index.html` and `js/generators/*.js`).
+2.  Refresh the local file in your browser.
+3.  Generate the bookmarklet.
+4.  Test against a live ServiceNow instance or mock.
