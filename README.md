@@ -2,9 +2,7 @@
 
 ## 🚀 Quick Start
 Welcome aboard! To boot the application locally and start generating tools:
-1. `npm ci` (Install testing dependencies).
-2. `npx jest --passWithNoTests` (Verify the build environment).
-3. Open `index.html` directly in your browser.
+1. Open `index.html` directly in your browser.
 
 ## 🛠️ Features & Workflow Optimization
 This suite is built on four core, independently engineered generators located in `js/generators/`. Each is designed to surgically eliminate specific administrative bottlenecks.
