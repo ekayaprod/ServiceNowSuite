@@ -112,6 +112,12 @@
                 document.getElementById('form-' + toolId).classList.remove('hidden');
                 this.goToStep(2);
             },
+            /**
+             * Renders the finalized bookmarklet tool and instructions into the UI.
+             *
+             * AST Reasoning: Updates the DOM to display the generated bookmarklet link and safely applies the payload.
+             * Business Intent: Updated in commit 0d3e740 to prevent structural degradation and enforce strict security boundaries.
+             */
             showResult(code, name, title, instructions) {
                 const container = document.getElementById('result-container');
                 container.innerHTML = `

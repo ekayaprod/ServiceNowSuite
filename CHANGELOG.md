@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ Update: Dynamic caller resolution support on Template builder.
 
 ### Chores
+- 🔧 Chore: Upgraded empty catch blocks across generator modules to preserve error telemetry.
+- 🔧 Chore: Cleaned up orphaned Jest dependencies and pruned manifest.
 - 🔧 Chore: Unified page builders into a streamlined SPA setup.
 - 🔧 Chore: Upgraded testing suites to Jest 30, robust strict checks, and GitHub actions configuration.
 - 🔧 Chore: Bootstrapped CI/CD code quality metrics pipelines.
