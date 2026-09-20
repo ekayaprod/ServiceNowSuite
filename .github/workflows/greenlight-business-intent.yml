@@ -1,0 +1,21 @@
+name: Greenlight Gate - Business Intent Documentation
+on:
+  pull_request:
+    paths:
+      - 'js/generators/**.js'
+permissions:
+  contents: read
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Greenlight Gate
+        run: node .greenlight/rules/business-intent-ast-reasoning.js --base "origin/${{ github.base_ref }}"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: greenlight-report
+          path: .greenlight/report.json

@@ -1,8 +1,2 @@
-.DS_Store
-.idea/
-.vscode/
-app_extracted.js
+.greenlight/report.json
 node_modules/
-__pycache__
-*.swp
-*.swo
