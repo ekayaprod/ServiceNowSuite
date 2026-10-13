@@ -101,10 +101,22 @@
     <script>
         const app = {
             currentTool: null,
+            /**
+             * Transitions the SPA to a specified step in the generation flow.
+             *
+             * AST Reasoning: Modifies DOM classes to hide inactive steps and display the target step container.
+             * Business Intent: Refactored in commit 1fbf6ea to unify page builders into a streamlined SPA setup.
+             */
             goToStep(stepNum) {
                 document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
                 document.getElementById('step-' + stepNum).classList.add('active');
             },
+            /**
+             * Initializes the configuration view for a selected tool.
+             *
+             * AST Reasoning: Updates the active tool state, modifies the view title, toggles visibility of the correct configuration form, and advances the UI step.
+             * Business Intent: Refactored in commit 1fbf6ea to unify page builders into a streamlined SPA setup.
+             */
             selectTool(toolId, toolName) {
                 this.currentTool = toolId;
                 document.getElementById('config-title').textContent = 'Configure ' + toolName;
