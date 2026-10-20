@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ Update: Fluid visual UI across elements, improved touch targets, and better semantic boundaries.
 - ✅ Update: Dynamic caller resolution support on Template builder.
 
+### Documentation
+- 📚 Docs: Rewrote and expanded README.md for portfolio presentation, detailing feature maps and setup matrix.
+
 ### Chores
 - 🔧 Chore: Validated lockfile state against manifest; no drift detected.
 - 🔧 Chore: Upgraded empty catch blocks across generator modules to preserve error telemetry.
